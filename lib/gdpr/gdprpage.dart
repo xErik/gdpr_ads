@@ -1,0 +1,179 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+
+import 'gdprservice.dart';
+
+/// Checks if a consent is necessary. Use this widget along these lines:
+///
+/// ```dart
+/// [GdprPage](
+///   () async => await MobileAds.instance.initialize(),
+///   () => Navigator.of(context).pushReplacement(
+///        MaterialPageRoute(builder: (context) => YourNextWidget()),
+///
+///   /// Optional loading widget
+///   loadingWidget: Scaffold(body:Center(child: Text('CONSENT! NOW!'))),
+///  );
+/// ```
+///
+/// - The first function will not get called in case of GDPR denial or error,
+/// it allows the user to opt out of Ad-Consent and the [MobileAds] should
+/// not get initialized.
+/// - The second function will allways get called.
+///
+/// Debug parameters are supported:
+///
+/// ```dart
+/// [GdprPage](
+///   () async => await MobileAds.instance.initialize(),
+///   () => Navigator.of(context).pushReplacement(
+///        MaterialPageRoute(builder: (context) => YourNextWidget()),
+/// ),
+///
+///   // Debug features are enabled for devices with these identifiers.
+///   debugTestIdentifiers: ["741F74 ...... 149"],
+///
+///   // Debug geography for testing geography.
+///   debugGeography: GdprHelperDebugGeography.insideEea,
+///
+///   // Will reset the consent form before showing it
+///   debugResetConsentForm: true,
+///
+///   // Will display a debug UI with the concrete error message, if any
+///   // Automatic forwad navigation is off, user has to press a button instead
+///   showDebugUI: kDebugMode,
+/// );
+/// ```
+///
+///
+/// ## If consent is necessary
+///
+/// Displays consent form.
+///
+/// If consent is given:
+/// 1. Executes user defined init method.
+/// 2. Executes user defined navigation method.
+///
+/// If consent is NOT given:
+/// 1. Executes user defined navigation method.
+///
+/// ## If consent is NOT necessary
+///
+/// 1. Executes user defined navigation method.
+///
+/// ## If on web:
+///
+/// 1. Executes user defined navigation method, as there are no ads for the web.
+class GdprPage extends StatefulWidget {
+  final AsyncCallback onConsentGivenInitMethod;
+  final VoidCallback navigationMethod;
+  final Widget loadingWidget;
+  final GdprDebugGeography debugGeography;
+  final List<String>? debugTestIdentifiers;
+  final bool debugResetConsentForm;
+  final bool showDebugUI;
+
+  const GdprPage(
+    this.onConsentGivenInitMethod,
+    this.navigationMethod, {
+    this.loadingWidget = const Center(child: CircularProgressIndicator()),
+    super.key,
+    this.debugGeography = GdprDebugGeography.disabled,
+    this.debugTestIdentifiers,
+    this.debugResetConsentForm = false,
+    this.showDebugUI = false,
+  });
+
+  @override
+  // ignore: library_private_types_in_public_api
+  createState() => _GdprPageState();
+}
+
+class _GdprPageState extends State<GdprPage> {
+  GdprResult? gdprResult;
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (kIsWeb) {
+        widget.navigationMethod.call();
+      } else {
+        if (widget.debugResetConsentForm) {
+          await GdprService.resetConsentForm();
+        }
+
+        final GdprResult result = await GdprService.requestConsentForm(
+          debugGeography: widget.debugGeography,
+          testIdentifiers: widget.debugTestIdentifiers,
+        );
+
+        setState(() {
+          gdprResult = result;
+        });
+
+        if (result.isSuccess()) {
+          await widget.onConsentGivenInitMethod.call();
+        }
+
+        if (widget.showDebugUI == false) {
+          widget.navigationMethod.call();
+        }
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // -------------------------------------------------------------------------
+    // SHOW NO-DEBUG
+    // -------------------------------------------------------------------------
+
+    if (widget.showDebugUI == false) {
+      return SafeArea(child: Scaffold(body: widget.loadingWidget));
+    }
+
+    // -------------------------------------------------------------------------
+    // SHOW DEBUG
+    // -------------------------------------------------------------------------
+
+    return SafeArea(
+      child: Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(value: gdprResult != null ? 0 : null),
+              if (gdprResult != null && widget.showDebugUI == true) ...[
+                const SizedBox(height: 32),
+                const Text('GDPR DEBUG MODE'),
+                const SizedBox(height: 32),
+                Text(
+                    'Consent Status: ${gdprResult!.status != null ? gdprResult!.status!.name : '(value not set)'}'),
+                const SizedBox(height: 32),
+                if (gdprResult!.isSuccess()) ...[
+                  const Text('GDPR processing with no errors'),
+                  const SizedBox(height: 32),
+                ],
+                if (gdprResult!.isError()) ...[
+                  const Text(
+                    'Based on your testing,\nthe error below may be exptecd.',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32),
+                  Text('Error code: ${gdprResult!.errorCode}'),
+                  Text(gdprResult!.errorMessage!),
+                  const SizedBox(height: 32),
+                ],
+                ElevatedButton(
+                    onPressed: () => widget.navigationMethod.call(),
+                    child: const Text('Navigate to next page')),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
