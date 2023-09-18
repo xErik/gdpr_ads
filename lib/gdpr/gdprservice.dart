@@ -76,11 +76,15 @@ class GdprService {
   }
 
   /// Allows user to update GDPR consent.
-  static Future<GdprResult> updateConsentForm() async {
+  static Future<GdprResult> updateConsentForm(
+      {List<String>? testIdentifiers}) async {
     final completer = Completer<GdprResult>();
 
-    ConsentInformation.instance
-        .requestConsentInfoUpdate(ConsentRequestParameters(), () async {
+    final params = ConsentRequestParameters(
+        consentDebugSettings:
+            ConsentDebugSettings(testIdentifiers: testIdentifiers));
+
+    ConsentInformation.instance.requestConsentInfoUpdate(params, () async {
       if (await ConsentInformation.instance.isConsentFormAvailable()) {
         ConsentForm.loadConsentForm((consentForm) {
           consentForm.show((formError) async {

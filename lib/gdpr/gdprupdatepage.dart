@@ -6,7 +6,7 @@ import 'gdprservice.dart';
 /// Checks if a consent is necessary. Use this widget along these lines:
 ///
 /// ```dart
-/// [GdprPage](
+/// [GdprUpdatePage](
 ///   () async => await MobileAds.instance.initialize(),
 ///   () => Navigator.of(context).pushReplacement(
 ///        MaterialPageRoute(builder: (context) => YourNextWidget()),
@@ -31,11 +31,6 @@ import 'gdprservice.dart';
 ///   // Debug features are enabled for devices with these identifiers.
 ///   debugTestIdentifiers: ["741F74 ...... 149"],
 ///
-///   // Debug geography for testing geography.
-///   debugGeography: GdprHelperDebugGeography.insideEea,
-///
-///   // Will reset the consent form before showing it
-///   debugResetConsentForm: true,
 ///
 ///   // Will display a debug UI with the concrete error message, if any
 ///   // Automatic forwad navigation is off, user has to press a button instead
@@ -43,51 +38,31 @@ import 'gdprservice.dart';
 /// );
 /// ```
 ///
-///
-/// ## If consent is necessary
-///
-/// Displays consent form.
-///
-/// If consent is given:
-/// 1. Executes user defined init method.
-/// 2. Executes user defined navigation method.
-///
-/// If consent is NOT given:
-/// 1. Executes user defined navigation method.
-///
-/// ## If consent is NOT necessary
-///
-/// 1. Executes user defined navigation method.
-///
-/// ## If on web:
+/// If on web:
 ///
 /// 1. Executes user defined navigation method, as there are no ads for the web.
-class GdprPage extends StatefulWidget {
+class GdprUpdatePage extends StatefulWidget {
   final AsyncCallback onConsentGivenInitMethod;
   final VoidCallback onNavigationMethod;
   final Widget loadingWidget;
-  final GdprDebugGeography debugGeography;
   final List<String>? debugTestIdentifiers;
-  final bool debugResetConsentForm;
   final bool showDebugUI;
 
-  const GdprPage(
+  const GdprUpdatePage(
     this.onConsentGivenInitMethod,
     this.onNavigationMethod, {
     this.loadingWidget = const Center(child: CircularProgressIndicator()),
-    super.key,
-    this.debugGeography = GdprDebugGeography.disabled,
     this.debugTestIdentifiers,
-    this.debugResetConsentForm = false,
     this.showDebugUI = false,
+    super.key,
   });
 
   @override
   // ignore: library_private_types_in_public_api
-  createState() => _GdprPageState();
+  createState() => _GdprUpdatePageState();
 }
 
-class _GdprPageState extends State<GdprPage> {
+class _GdprUpdatePageState extends State<GdprUpdatePage> {
   GdprResult? gdprResult;
 
   @override
@@ -98,14 +73,8 @@ class _GdprPageState extends State<GdprPage> {
       if (kIsWeb) {
         widget.onNavigationMethod.call();
       } else {
-        if (widget.debugResetConsentForm) {
-          await GdprService.resetConsentForm();
-        }
-
-        final GdprResult result = await GdprService.requestConsentForm(
-          debugGeography: widget.debugGeography,
-          testIdentifiers: widget.debugTestIdentifiers,
-        );
+        final GdprResult result = await GdprService.updateConsentForm(
+            testIdentifiers: widget.debugTestIdentifiers);
 
         setState(() {
           gdprResult = result;

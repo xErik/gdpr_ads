@@ -103,6 +103,25 @@ class AfterGdprState extends State<AfterGdprPage> {
                   },
                   child: const Text('Reset GDPR and go to GDPR Check')),
             ),
+            //
+            // UPDATE GDPR CONSENT FORM
+            //
+            const SizedBox(height: 32),
+            const Divider(thickness: 2, color: Colors.black),
+            ListTile(
+              title: const Text('GDPR update\n(returns on web)',
+                  textAlign: TextAlign.center),
+              subtitle: TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const GdprCheckWrapper(showUpdateConsentForm: true),
+                      ),
+                    );
+                  },
+                  child: const Text('GDPR update')),
+            ),
           ],
         ),
       ),
@@ -158,7 +177,6 @@ ${interRewardedResponse!.prettyError()}''';
 
   Future<void> _showInterAd() async {
     final result = await AdService().showInterstitial();
-
     setState(() => interResponse = result);
   }
 }
