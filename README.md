@@ -89,7 +89,7 @@ class GdprCheckWrapper extends StatelessWidget {
   /// Displays an GDPR initial dialog
   /// It will only display the dialog if not prior GDPR has been collected.
   Widget _gdprPage(BuildContext context) {
-    return GdprPage(
+    return GdprInitialPage(
       () async => _initAdmob(),
       () {
         Navigator.of(context).pushReplacement(

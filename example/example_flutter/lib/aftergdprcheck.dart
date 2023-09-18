@@ -1,10 +1,10 @@
-import 'package:example_flutter/gdprcheckwrapper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gdpr_ads/ads/adbanner.dart';
 import 'package:gdpr_ads/ads/adservice.dart';
 import 'package:gdpr_ads/ads/responseinterstitial.dart';
 import 'package:gdpr_ads/ads/responseinterstitialrewarded.dart';
+import 'package:gdpr_ads/gdpr/gdprpagemanager.dart';
 
 class AfterGdprPage extends StatefulWidget {
   const AfterGdprPage({Key? key}) : super(key: key);
@@ -77,7 +77,8 @@ class AfterGdprState extends State<AfterGdprPage> {
                   onPressed: () {
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
-                        builder: (context) => const GdprCheckWrapper(),
+                        builder: (context) =>
+                            GdprPageManager.singleton.initialPage(),
                       ),
                     );
                   },
@@ -97,7 +98,7 @@ class AfterGdprState extends State<AfterGdprPage> {
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
                         builder: (context) =>
-                            const GdprCheckWrapper(resetConfirmationForm: true),
+                            GdprPageManager.singleton.initialPageReset(),
                       ),
                     );
                   },
@@ -116,7 +117,7 @@ class AfterGdprState extends State<AfterGdprPage> {
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
                         builder: (context) =>
-                            const GdprCheckWrapper(showUpdateConsentForm: true),
+                            GdprPageManager.singleton.updatePage(),
                       ),
                     );
                   },

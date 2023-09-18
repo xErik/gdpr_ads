@@ -17,12 +17,12 @@ import 'gdprservice.dart';
 /// ```
 ///
 /// - The first function will not get called in case of GDPR denial or error.
-/// - The second function will allways get called.
+/// - The second function will always get called.
 ///
 /// Debug parameters are supported:
 ///
 /// ```dart
-/// [GdprPage](
+/// [GdprInitialPage](
 ///   () async => await MobileAds.instance.initialize(),
 ///   () => Navigator.of(context).pushReplacement(
 ///        MaterialPageRoute(builder: (context) => YourNextWidget()),

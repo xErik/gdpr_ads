@@ -2,7 +2,7 @@
 
 The GDPR page uses the GDPR service. 
 
-Make the `GdprPage` the initial screen / home screen of the app and it will display or not display GDPR dialogs as necessary. The page offers debug configuration options like resetting the GDPR consent.
+Make the `GdprInitialPage` the initial screen / home screen of the app and it will display or not display GDPR dialogs as necessary. The page offers debug configuration options like resetting the GDPR consent.
 
 Use the `GdprUpdatePage` to show an update dialog. It will always display the dialog.
 
@@ -12,7 +12,7 @@ Alternatively, use the `GdprService` for a custom solution.
 
 ```dart
 Scaffold(body:
-  GdprPage(
+  GdprInitialPage(
     () async {
       AdService().initialize(
           bannerIds: [Config.bannerAdId],

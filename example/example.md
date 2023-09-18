@@ -1,13 +1,13 @@
-# Wrapper-Widget for GdprPage
+# Wrapper-Widget for GdprInitialPage
 
-The widget below is a simple wrapper to make [GdprPage] reusable
+The widget below is a simple wrapper to make [GdprInitialPage] reusable
 with the same configuration.
 
 ```dart
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gdpr_ads/ads/adservice.dart';
-import 'package:gdpr_ads/gdpr/gdprpage.dart';
+import 'package:gdpr_ads/gdpr/gdprinitialpage.dart';
 import 'package:gdpr_ads/gdpr/gdprservice.dart';
 
 class GdprCheckWrapper extends StatelessWidget {
@@ -18,7 +18,7 @@ class GdprCheckWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GdprPage(
+    return GdprInitialPage(
       () async {
         AdService().initialize(
             bannerIds: [Config.bannerAdId],

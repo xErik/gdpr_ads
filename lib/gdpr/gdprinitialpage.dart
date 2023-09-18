@@ -6,7 +6,7 @@ import 'gdprservice.dart';
 /// Checks if a consent is necessary. Use this widget along these lines:
 ///
 /// ```dart
-/// [GdprPage](
+/// [GdprInitialPage](
 ///   () async => await MobileAds.instance.initialize(),
 ///   () => Navigator.of(context).pushReplacement(
 ///        MaterialPageRoute(builder: (context) => YourNextWidget()),
@@ -17,12 +17,12 @@ import 'gdprservice.dart';
 /// ```
 ///
 /// - The first function will not get called in case of GDPR denial or error.
-/// - The second function will allways get called.
+/// - The second function will always get called.
 ///
 /// Debug parameters are supported:
 ///
 /// ```dart
-/// [GdprPage](
+/// [GdprInitialPage](
 ///   () async => await MobileAds.instance.initialize(),
 ///   () => Navigator.of(context).pushReplacement(
 ///        MaterialPageRoute(builder: (context) => YourNextWidget()),
@@ -62,7 +62,7 @@ import 'gdprservice.dart';
 /// ## If on web:
 ///
 /// 1. Executes user defined navigation method, as there are no ads for the web.
-class GdprPage extends StatefulWidget {
+class GdprInitialPage extends StatefulWidget {
   final AsyncCallback onConsentGivenInitMethod;
   final VoidCallback onNavigationMethod;
   final Widget loadingWidget;
@@ -71,7 +71,7 @@ class GdprPage extends StatefulWidget {
   final bool debugResetConsentForm;
   final bool showDebugUI;
 
-  const GdprPage(
+  const GdprInitialPage(
     this.onConsentGivenInitMethod,
     this.onNavigationMethod, {
     this.loadingWidget = const Center(child: CircularProgressIndicator()),
@@ -84,10 +84,10 @@ class GdprPage extends StatefulWidget {
 
   @override
   // ignore: library_private_types_in_public_api
-  createState() => _GdprPageState();
+  createState() => _GdprInitialPageState();
 }
 
-class _GdprPageState extends State<GdprPage> {
+class _GdprInitialPageState extends State<GdprInitialPage> {
   GdprResult? gdprResult;
 
   @override
