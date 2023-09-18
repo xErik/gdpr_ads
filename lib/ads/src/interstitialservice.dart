@@ -26,8 +26,7 @@ class InterstitialServiceInstance {
       } else if (_adToShow != null) {
         await _adToShow?.show();
 
-        // The ad may have been dismissed by user and the
-        // completer already completed with that status.
+        // errors might occur during show() and complete the completer in fetchAd().
         if (_completer.isCompleted == false) {
           _completer.complete(
               ResponseInterstitial(StatusInterstitial.displaySuccess));
@@ -58,8 +57,7 @@ class InterstitialServiceInstance {
             ad.fullScreenContentCallback = FullScreenContentCallback(
                 // Called when the ad showed the full screen content.
                 onAdShowedFullScreenContent: (ad) {
-                  _completer.complete(
-                      ResponseInterstitial(StatusInterstitial.displaySuccess));
+                  // success case is handled in showAd
                 },
                 // Called when an impression occurs on the ad.
                 onAdImpression: (ad) {},

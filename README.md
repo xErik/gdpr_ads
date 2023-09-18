@@ -203,7 +203,7 @@ tracked and a appropirate repsonse should be returned.
 
 ## Additional information
 
-Ads are quirky and Google Admob can be painful, Ad slots may not get filled by Admob sometimes, some VPNs do get get served with Ads.  
+Google Admob can be painful, Ad slots may not get filled by Admob sometimes, not sure if VPNs play well with Admob.  
 
 Please open issues here:
 

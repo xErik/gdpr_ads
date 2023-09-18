@@ -24,24 +24,31 @@ class RewardedInterstitialInstance {
   /// Call [fetchAd] before calling this method.
   Future<ResponseInterstitialRewarded> showConfirmAdDialog(
       BuildContext context) async {
-    _log('Checking ad confirm dialog ...');
+    _log('Checking RewardedInterstitialAd confirm dialog ...');
 
     /// The completer may indicate failed loading in [fetchAd].
     if (_completer.isCompleted == false) {
       if (_adToShow == null) {
+        _log('Aborting, _adToShow is NULL');
+
         _completer.complete(ResponseInterstitialRewarded(
             StatusInterstitialRewarded.notLoadedGenerally));
       } else {
+        _log('Opening RewardedInterstitialAd confirm dialog ...');
+
         await showDialog<StatusInterstitialRewarded>(
           context: context,
           builder: (_) => DialogConfirmAd(showNoAd: () {
+            _log('Opening RewardedInterstitialAd showNoAd()');
             _completer.complete(ResponseInterstitialRewarded(
                 StatusInterstitialRewarded.displayDeniedByUser));
           }, showAd: () {
+            // _log('Opening RewardedInterstitialAd showAd()');
             _adToShow?.show(
               onUserEarnedReward: (AdWithoutView view, RewardItem rewardItem) {
                 // Called on success.
                 // The completer is not completed at this point.
+                _log('InterstitialRewardedAd onUserEarnedReward');
                 _completer.complete(
                   ResponseInterstitialRewarded(
                     StatusInterstitialRewarded.displaySuccess,
@@ -60,6 +67,8 @@ class RewardedInterstitialInstance {
 
   /// Fetches an ad in the background.
   void fetchAd() {
+    _log('Checking fetching RewardedInterstitialAd ...');
+
     _completer = Completer<ResponseInterstitialRewarded>();
     _adToShow = null;
 
@@ -68,11 +77,6 @@ class RewardedInterstitialInstance {
           StatusInterstitialRewarded.notLoadedOnWeb));
       _log(
           'Aborted loading RewardedInterstitialAd: ads not available on the web');
-      // } else if (_adUnitId == null) {
-      //   _completer.complete(ResponseInterstitialRewarded(
-      //       StatusInterstitialRewarded.notLoadedAdIdNotSet));
-      //   _log(
-      //       'Aborted loading RewardedInterstitialAd: GDPR denied or error?');
     } else {
       _log('Loading RewardedInterstitialAd...');
 
@@ -84,23 +88,46 @@ class RewardedInterstitialInstance {
             ad.fullScreenContentCallback = FullScreenContentCallback(
                 // Called when the ad showed the full screen content.
                 onAdShowedFullScreenContent: (ad) {
-                  _completer.complete(ResponseInterstitialRewarded(
-                      StatusInterstitialRewarded.displaySuccess));
-                },
+              // Succes handling is donw in:
+              // _adToShow?.show( onUserEarnedReward
+              //
+              // Do NOT handle that here.
+              _log('InterstitialRewardedAd onAdShowedFullScreenContent');
+            },
                 // Called when an impression occurs on the ad.
-                onAdImpression: (ad) {},
+                onAdImpression: (ad) {
+              _log('InterstitialRewardedAd onAdImpression');
+            },
                 // Called when the ad failed to show full screen content.
                 onAdFailedToShowFullScreenContent: (ad, err) {
-                  ad.dispose();
-                  _completer.complete(ResponseInterstitialRewarded(
-                      StatusInterstitialRewarded.notLoadedGenerally));
-                },
+              ad.dispose();
+
+              // Is this true:
+              // Did the user cut the ad short?
+              // @TODO
+
+              _log('InterstitialRewardedAd onAdFailedToShowFullScreenContent');
+
+              _completer.complete(ResponseInterstitialRewarded(
+                  StatusInterstitialRewarded.displayDeniedByUser));
+            },
                 // Called when the ad dismissed full screen content.
                 onAdDismissedFullScreenContent: (ad) {
-                  ad.dispose();
-                },
+              _log('InterstitialRewardedAd onAdDismissedFullScreenContent');
+              // This happens when onUserEarnedReward() had not been called,
+              // which means the user dismissed the add.
+              // Thus, it needs to get completed here.
+              if (_completer.isCompleted == false) {
+                _completer.complete(ResponseInterstitialRewarded(
+                    StatusInterstitialRewarded.displayDeniedByUser));
+              }
+
+              ad.dispose();
+            },
                 // Called when a click is recorded for an ad.
-                onAdClicked: (ad) {});
+                onAdClicked: (ad) {
+              _log('InterstitialRewardedAd onAdClicked');
+            });
 
             _adToShow = ad;
             _log('InterstitialRewardedAd loaded');
