@@ -3,8 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gdpr_ads/ads/adbanner.dart';
 import 'package:gdpr_ads/ads/adservice.dart';
-import 'package:gdpr_ads/ads/responseintersitial.dart';
-import 'package:gdpr_ads/ads/responseintersitialrewarded.dart';
+import 'package:gdpr_ads/ads/responseinterstitial.dart';
+import 'package:gdpr_ads/ads/responseinterstitialrewarded.dart';
 
 class AfterGdprPage extends StatefulWidget {
   const AfterGdprPage({Key? key}) : super(key: key);
@@ -29,36 +29,38 @@ class AfterGdprState extends State<AfterGdprPage> {
             //
             // BANNER
             //
-            const ListTile(
-                title: Text('Banner', textAlign: TextAlign.center),
+            ListTile(
+                title: const Text('Banner', textAlign: TextAlign.center),
                 subtitle: AdBanner()),
             //
-            // INTERSITIAL
+            // INTERSTITAL
             //
             const SizedBox(height: 32),
+            const Divider(thickness: 2, color: Colors.black),
             ListTile(
-              title: const Text('Intersitial Ad', textAlign: TextAlign.center),
+              title: const Text('Interstitial Ad', textAlign: TextAlign.center),
               subtitle: Column(
                 children: [
                   TextButton(
                       onPressed: () => _showInterAd(),
-                      child: const Text('Open Intersitial Ad')),
+                      child: const Text('Open Interstitial Ad')),
                   Text(_prettyInterStatus()),
                 ],
               ),
             ),
             //
-            // INTERSITIAL REWARDED
+            // INTERSTITAL REWARDED
             //
             const SizedBox(height: 32),
+            const Divider(thickness: 2, color: Colors.black),
             ListTile(
-              title: const Text('Intersitial RewardedAd',
+              title: const Text('Interstitial RewardedAd',
                   textAlign: TextAlign.center),
               subtitle: Column(
                 children: [
                   TextButton(
                       onPressed: () => _showInterRewardedAd(context),
-                      child: const Text('Open Intersitial Rewarded Ad')),
+                      child: const Text('Open Interstitial Rewarded Ad')),
                   Text(_prettyInterRewardedStatus()),
                 ],
               ),
@@ -67,6 +69,7 @@ class AfterGdprState extends State<AfterGdprPage> {
             // GDPR CHECK AGAIN
             //
             const SizedBox(height: 32),
+            const Divider(thickness: 2, color: Colors.black),
             ListTile(
               title: const Text('GDPR check again\n(returns on web)',
                   textAlign: TextAlign.center),
@@ -84,6 +87,7 @@ class AfterGdprState extends State<AfterGdprPage> {
             // RESET GDPR and then GDPR CHECK AGAIN
             //
             const SizedBox(height: 32),
+            const Divider(thickness: 2, color: Colors.black),
             ListTile(
               title: const Text(
                   'Reset GDPR and go to GDPR Check\n(returns on web)',
@@ -119,15 +123,15 @@ class AfterGdprState extends State<AfterGdprPage> {
 
   String _prettyInterStatus() {
     final res = '''
-Status: ${interResponse == null ? '(not set)' : interResponse!.status.name}''';
+Status: ${interResponse == null ? '(ads disabled or not called)' : interResponse!.status.name}''';
     return res;
   }
 
   String _prettyInterRewardedStatus() {
     String res = '''
-Status: (not set)
-Reward amount: (not set)
-Reward type: (not set)''';
+Status: (ads disabled or not called)
+Reward amount: (ads disabled or not called)
+Reward type: (ads disabled or not called)''';
 
     if (interRewardedResponse != null) {
       res = '''
@@ -140,12 +144,12 @@ Reward type: ${interRewardedResponse!.rewardType}''';
   }
 
   Future<void> _showInterRewardedAd(BuildContext context) async {
-    final result = await AdService().showIntersitialRewarded(context);
+    final result = await AdService().showInterstitialRewarded(context);
     setState(() => interRewardedResponse = result);
   }
 
   Future<void> _showInterAd() async {
-    final result = await AdService().showIntersitial();
+    final result = await AdService().showInterstitial();
 
     setState(() => interResponse = result);
   }

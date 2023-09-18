@@ -29,19 +29,11 @@ class BannerServiceInstance {
     }
   }
 
-  /// Will load an ad if:
-  /// 1. Not in web context
-  /// 2. An addId has been set in [init]
-  ///
-  /// Call [fetchAd] before calling this method.
+  /// Call [init] and [fetchAd] before calling this method.
   Future<ResponseBanner> getAd() async => _completer.future;
 
-  /// A result may be an ad but also a failure to load an ed.
-  // bool get hasAdResult => _completer.isCompleted;
-
   /// Fetches an ad in the background.
-  /// No neet to `await` for it.
-  Future<void> fetchAd() async {
+  void fetchAd() {
     _completer = Completer<ResponseBanner>();
 
     if (kIsWeb == true) {
@@ -52,14 +44,15 @@ class BannerServiceInstance {
       _log(
           'Aborted loading BannerAd: init() not called, GDPR denied or error?');
     } else {
-      await BannerAd(
+      // no await
+      BannerAd(
         adUnitId: _adUnitId!,
         size: AdSize.banner,
         request: const AdRequest(),
         listener: BannerAdListener(
           onAdLoaded: (ad) {
-            _completer.complete(ResponseBanner(StatusBanner.displaySuccess,
-                ad: ad as BannerAd));
+            _completer.complete(
+                ResponseBanner(StatusBanner.loadedSuccess, ad: ad as BannerAd));
             _log('BannerAd loaded');
           },
           onAdFailedToLoad: (ad, error) {

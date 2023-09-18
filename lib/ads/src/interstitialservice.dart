@@ -4,7 +4,7 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
-import '../responseintersitial.dart';
+import '../responseinterstitial.dart';
 
 class InterstitialServiceInstance {
   Completer<ResponseInterstitial> _completer =
@@ -38,8 +38,13 @@ class InterstitialServiceInstance {
           ResponseInterstitial(StatusInterstitial.notLoadedGenerally));
     } else if (_adToShow != null) {
       await _adToShow?.show();
-      _completer
-          .complete(ResponseInterstitial(StatusInterstitial.displaySuccess));
+
+      // The ad may have been dismissed by user and the
+      // completer already completed with that status.
+      if (_completer.isCompleted == false) {
+        _completer
+            .complete(ResponseInterstitial(StatusInterstitial.displaySuccess));
+      }
     }
 
     return _completer.future;
@@ -47,7 +52,7 @@ class InterstitialServiceInstance {
 
   /// Fetches an ad in the background.
   /// No neet to `await` for it.
-  Future<void> fetchAd() async {
+  void fetchAd() {
     _completer = Completer<ResponseInterstitial>();
 
     if (kIsWeb == true) {
@@ -62,16 +67,17 @@ class InterstitialServiceInstance {
     } else {
       _log('Loading InterstitialAd');
 
-      _completer = Completer<ResponseInterstitial>();
-
-      await InterstitialAd.load(
+      InterstitialAd.load(
         adUnitId: _adUnitId!,
         request: const AdRequest(),
         adLoadCallback: InterstitialAdLoadCallback(
           onAdLoaded: (ad) {
             ad.fullScreenContentCallback = FullScreenContentCallback(
                 // Called when the ad showed the full screen content.
-                onAdShowedFullScreenContent: (ad) {},
+                onAdShowedFullScreenContent: (ad) {
+                  _completer.complete(
+                      ResponseInterstitial(StatusInterstitial.displaySuccess));
+                },
                 // Called when an impression occurs on the ad.
                 onAdImpression: (ad) {},
                 // Called when the ad failed to show full screen content.
@@ -83,8 +89,6 @@ class InterstitialServiceInstance {
                 // Called when the ad dismissed full screen content.
                 onAdDismissedFullScreenContent: (ad) {
                   ad.dispose();
-                  _completer.complete(ResponseInterstitial(
-                      StatusInterstitial.displayDeniedByUser));
                 },
                 // Called when a click is recorded for an ad.
                 onAdClicked: (ad) {});

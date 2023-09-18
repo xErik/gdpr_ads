@@ -6,13 +6,17 @@ enum StatusInterstitialRewarded {
   /// Failed to load the ad
   notLoadedGenerally,
 
-  /// Failed to load the ad in case of GDPR denial etc.
+  /// No ad ID(s) given
   notLoadedAdIdNotSet,
 
   // Ad had been shown right now
   displaySuccess,
+
   // User denied seeing the ad in the confirmation dialog
-  displayDeniedByUser
+  displayDeniedByUser,
+
+  /// Ads disabled programmatically
+  displayDeniedProgrammatically,
 }
 
 /// Response when failing or succeeding in showing an ad.

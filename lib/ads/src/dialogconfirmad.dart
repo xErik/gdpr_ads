@@ -4,8 +4,11 @@ import 'countdowntimer.dart';
 
 class DialogConfirmAd extends StatefulWidget {
   final VoidCallback showAd;
+  final VoidCallback showNoAd;
 
-  const DialogConfirmAd({Key? key, required this.showAd}) : super(key: key);
+  const DialogConfirmAd(
+      {Key? key, required this.showAd, required this.showNoAd})
+      : super(key: key);
 
   @override
   DialogConfirmAdState createState() => DialogConfirmAdState();
@@ -30,6 +33,11 @@ class DialogConfirmAdState extends State<DialogConfirmAd> {
     super.initState();
   }
 
+  void _showNoAd(BuildContext context) {
+    widget.showNoAd.call();
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -39,7 +47,7 @@ class DialogConfirmAdState extends State<DialogConfirmAd> {
           'Watch an add and support this free App, please. Thank you!'),
       actions: [
         TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => _showNoAd(context),
             child: const Text('No thanks')),
         TextButton(
             onPressed: null,

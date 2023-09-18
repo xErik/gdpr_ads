@@ -6,18 +6,22 @@ enum StatusInterstitial {
   /// Failed to load the ad
   notLoadedGenerally,
 
-  /// Failed to load the ad in case of GDPR denial etc.
+  /// Service instance has no ad to load
   notLoadedAdIdNotSet,
 
-  // Ad had been shown right now
+  /// Ad had been shown right now
   displaySuccess,
-  // User denied seeing the ad in the confirmation dialog
-  displayDeniedByUser
+
+  /// User denied seeing the ad in the confirmation dialog
+  // displayDeniedByUser,
+
+  /// Ads disabled programmatically
+  displayDeniedProgrammatically,
 }
 
 /// Response when failing or succeeding in showing an ad.
 
-/// Call `ad!.show()` to display the intersitial ad.
+/// Call `ad!.show()` to display the interstitial ad.
 class ResponseInterstitial {
   StatusInterstitial status;
   // InterstitialAd? ad;

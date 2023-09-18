@@ -29,7 +29,7 @@ class Config {
       ? "ca-app-pub-3940256099942544/6300978111"
       : "ca-app-pub-5692132423340230/3568305459";
 
-  static String get intersitialAdId => kDebugMode
+  static String get interstitialAdId => kDebugMode
       ? "ca-app-pub-3940256099942544/1033173712"
       : "ca-app-pub-5692132423340230/7671201992";
 

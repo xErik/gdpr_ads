@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
-import '../responseintersitialrewarded.dart';
+import '../responseinterstitialrewarded.dart';
 import 'dialogconfirmad.dart';
 
 class RewardedInterstitialInstance {
@@ -40,35 +40,42 @@ class RewardedInterstitialInstance {
       BuildContext context) async {
     _log('Checking ad confirm dialog ...');
 
-    if (_adToShow == null) {
-      _completer.complete(ResponseInterstitialRewarded(
-          StatusInterstitialRewarded.notLoadedGenerally));
-    } else {
-      // NO AWAIT
-      showDialog<StatusInterstitialRewarded>(
-        context: context,
-        builder: (_) => DialogConfirmAd(showAd: () {
-          _adToShow?.show(
-            onUserEarnedReward: (AdWithoutView view, RewardItem rewardItem) {
-              _completer.complete(
-                ResponseInterstitialRewarded(
-                  StatusInterstitialRewarded.displaySuccess,
-                  rewardAmount: rewardItem.amount,
-                  rewardType: rewardItem.type,
-                ),
-              );
-            },
-          );
-        }),
-      );
+    /// The completer may indicate failed loading in [fetchAd].
+    if (_completer.isCompleted == false) {
+      if (_adToShow == null) {
+        _completer.complete(ResponseInterstitialRewarded(
+            StatusInterstitialRewarded.notLoadedGenerally));
+      } else {
+        await showDialog<StatusInterstitialRewarded>(
+          context: context,
+          builder: (_) => DialogConfirmAd(showNoAd: () {
+            _completer.complete(ResponseInterstitialRewarded(
+                StatusInterstitialRewarded.displayDeniedByUser));
+          }, showAd: () {
+            _adToShow?.show(
+              onUserEarnedReward: (AdWithoutView view, RewardItem rewardItem) {
+                // Called on success.
+                // The completer is not completed at this point.
+                _completer.complete(
+                  ResponseInterstitialRewarded(
+                    StatusInterstitialRewarded.displaySuccess,
+                    rewardAmount: rewardItem.amount,
+                    rewardType: rewardItem.type,
+                  ),
+                );
+              },
+            );
+          }),
+        );
+      }
     }
     return _completer.future;
   }
 
   /// Fetches an ad in the background.
-  /// No neet to `await` for it.
-  Future<void> fetchAd() async {
+  void fetchAd() {
     _completer = Completer<ResponseInterstitialRewarded>();
+    _adToShow = null;
 
     if (kIsWeb == true) {
       _completer.complete(ResponseInterstitialRewarded(
@@ -81,9 +88,9 @@ class RewardedInterstitialInstance {
       _log(
           'Aborted loading RewardedInterstitialAd: init() not called, GDPR denied or error?');
     } else {
-      _log('Loading RewardedInterstitialAd');
+      _log('Loading RewardedInterstitialAd...');
 
-      await RewardedInterstitialAd.load(
+      RewardedInterstitialAd.load(
         adUnitId: _adUnitId!,
         request: const AdRequest(),
         rewardedInterstitialAdLoadCallback: RewardedInterstitialAdLoadCallback(
@@ -109,7 +116,7 @@ class RewardedInterstitialInstance {
                 onAdClicked: (ad) {});
 
             _adToShow = ad;
-            _log('IntersitialRewardedAd loaded');
+            _log('InterstitialRewardedAd loaded');
           },
           onAdFailedToLoad: (LoadAdError error) {
             _log(

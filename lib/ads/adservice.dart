@@ -1,9 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'responsebanner.dart';
-import 'responseintersitial.dart';
-import 'responseintersitialrewarded.dart';
+import 'responseinterstitial.dart';
+import 'responseinterstitialrewarded.dart';
 import 'src/bannerservice.dart';
 import 'src/interstitialservice.dart';
 import 'src/rewardedinterstitialservice.dart';
@@ -18,8 +20,8 @@ class AdService {
   List<String>? _testDeviceIds;
 
   final Map<String, BannerServiceInstance> _bannerMap = {};
-  final Map<String, InterstitialServiceInstance> _intersitialMap = {};
-  final Map<String, RewardedInterstitialInstance> _intersitialRewardedMap = {};
+  final Map<String, InterstitialServiceInstance> _intertsitialMap = {};
+  final Map<String, RewardedInterstitialInstance> _interstitialRewardedMap = {};
 
   AdService._internal();
   static final AdService _singleton = AdService._internal();
@@ -32,8 +34,10 @@ class AdService {
   void enableAds() => _serveAds = true;
 
   /// Sets test device IDs to get test ads
-  void setTestDeviceIds(List<String>? testDeviceIds) =>
-      _testDeviceIds = testDeviceIds;
+  void setTestDeviceIds(List<String>? testDeviceIds) {
+    _testDeviceIds = testDeviceIds;
+    _log('Set testDeviceIds: $testDeviceIds');
+  }
 
   // --------------------------------------------------------------------------
   // ADD AD IDs
@@ -49,38 +53,41 @@ class AdService {
     for (String adUnitId in adUnitIds) {
       final instance = BannerServiceInstance();
       await instance.init(adUnitId, testDeviceIds: _testDeviceIds);
-      await instance.fetchAd();
+      instance.fetchAd();
       _bannerMap.putIfAbsent(adUnitId, () => instance);
+      _log('Add bannerId: $adUnitId');
     }
   }
 
-  /// Spins up an intersitial rewarded ad.
+  /// Spins up an interstitial rewarded ad.
   /// Does nothing if serving ads is disabled.
   /// No need to [await].
-  Future<void> addIntersitialRewarded(List<String> adUnitIds) async {
+  Future<void> addInterstitialRewarded(List<String> adUnitIds) async {
     if (_serveAds == false) {
       return;
     }
     for (String adUnitId in adUnitIds) {
       final instance = RewardedInterstitialInstance();
       await instance.init(adUnitId, testDeviceIds: _testDeviceIds);
-      await instance.fetchAd();
-      _intersitialRewardedMap.putIfAbsent(adUnitId, () => instance);
+      instance.fetchAd();
+      _interstitialRewardedMap.putIfAbsent(adUnitId, () => instance);
+      _log('Add interRewardedId: $adUnitId');
     }
   }
 
-  /// Spins up an intersitial rewarded ad.
+  /// Spins up an interstitial rewarded ad.
   /// Does nothing if serving ads is disabled.
   /// No need to [await].
-  Future<void> addIntersitial(List<String> adUnitIds) async {
+  Future<void> addInterstitial(List<String> adUnitIds) async {
     if (_serveAds == false) {
       return;
     }
     for (String adUnitId in adUnitIds) {
       final instance = InterstitialServiceInstance();
       await instance.init(adUnitId, testDeviceIds: _testDeviceIds);
-      await instance.fetchAd();
-      _intersitialMap.putIfAbsent(adUnitId, () => instance);
+      instance.fetchAd();
+      _intertsitialMap.putIfAbsent(adUnitId, () => instance);
+      _log('Add intersitialId: $adUnitId');
     }
   }
 
@@ -90,68 +97,68 @@ class AdService {
 
   /// Use the widget [AdBanner] instead of using this method.
   /// Returns a [ResponseBanner] which contains a status and potentially a [BannerAd].
-  /// Returns NULL is serving ads is disabled.
-  Future<ResponseBanner?> showBanner({String? adUnitId}) async {
+  Future<ResponseBanner> getBanner({String? adUnitId}) async {
     if (_serveAds == false) {
-      return null;
+      return ResponseBanner(StatusBanner.displayDeniedProgrammatically);
     }
 
-    if (adUnitId != null) {
-      if (_bannerMap[adUnitId] == null) {
-        throw 'Banner-adUnitId not set, add it before calling this method.';
-      }
-    } else {
-      if (_bannerMap.isEmpty) {
-        throw 'Banner-adUnitId not set, can cannot find a substitute';
-      }
-      adUnitId = _bannerMap.keys.first;
+    if (_bannerMap[adUnitId] == null && _bannerMap.isEmpty) {
+      return ResponseBanner(StatusBanner.notLoadedAdIdNotSet);
     }
 
-    return await _bannerMap[adUnitId]!.getAd();
+    adUnitId ??= _bannerMap.keys.first;
+
+    final result = await _bannerMap[adUnitId]!.getAd();
+
+    _bannerMap[adUnitId]!.fetchAd(); // no await
+
+    return result;
   }
 
   /// Returns a [ResponseInterstitialRewarded] which informs about the rewarded dialog.
-  /// Returns NULL is serving ads is disabled.
-  Future<ResponseInterstitialRewarded?> showIntersitialRewarded(
+  Future<ResponseInterstitialRewarded> showInterstitialRewarded(
       BuildContext context,
       {String? adUnitId}) async {
     if (_serveAds == false) {
-      return null;
+      return ResponseInterstitialRewarded(
+          StatusInterstitialRewarded.displayDeniedProgrammatically);
     }
 
-    if (adUnitId != null) {
-      if (_intersitialRewardedMap[adUnitId] == null) {
-        throw 'InterstitialRewarded-adUnitId not set, add it before calling this method.';
-      }
-    } else {
-      if (_intersitialRewardedMap.isEmpty) {
-        throw 'InterstitialRewarded-adUnitId not set, can cannot find a substitute';
-      }
-      adUnitId = _intersitialRewardedMap.keys.first;
+    if (_interstitialRewardedMap[adUnitId] == null &&
+        _interstitialRewardedMap.isEmpty) {
+      return ResponseInterstitialRewarded(
+          StatusInterstitialRewarded.notLoadedAdIdNotSet);
     }
 
-    return await _intersitialRewardedMap[adUnitId]!
-        .showConfirmAdDialog(context);
+    adUnitId ??= _interstitialRewardedMap.keys.first;
+
+    final result =
+        await _interstitialRewardedMap[adUnitId]!.showConfirmAdDialog(context);
+
+    _interstitialRewardedMap[adUnitId]!.fetchAd(); // no await
+
+    return result;
   }
 
   /// Returns a [ResponseInterstitial] which informs about the rewarded dialog.
-  /// Returns NULL is serving ads is disabled.
-  Future<ResponseInterstitial?> showIntersitial({String? adUnitId}) async {
+  Future<ResponseInterstitial> showInterstitial({String? adUnitId}) async {
     if (_serveAds == false) {
-      return null;
+      return ResponseInterstitial(
+          StatusInterstitial.displayDeniedProgrammatically);
     }
 
-    if (adUnitId != null) {
-      if (_intersitialMap[adUnitId] == null) {
-        throw 'Interstitial-adUnitId not set, add it before calling this method.';
-      }
-    } else {
-      if (_intersitialMap.isEmpty) {
-        throw 'Interstitial-adUnitId not set, can cannot find a substitute';
-      }
-      adUnitId = _intersitialMap.keys.first;
+    if (_intertsitialMap[adUnitId] == null && _intertsitialMap.isEmpty) {
+      return ResponseInterstitial(StatusInterstitial.notLoadedAdIdNotSet);
     }
 
-    return await _intersitialMap[adUnitId]!.showAd();
+    adUnitId ??= _intertsitialMap.keys.first;
+
+    final result = await _intertsitialMap[adUnitId]!.showAd();
+
+    _intertsitialMap[adUnitId]!.fetchAd(); // no await
+
+    return result;
   }
+
+  _log(String text) => log(text, name: runtimeType.toString());
 }

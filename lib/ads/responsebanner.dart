@@ -21,6 +21,9 @@ enum StatusBanner {
   /// Failed to load the ad in case of GDPR denial etc.
   notLoadedAdIdNotSet,
 
-  // Ad had been shown right now
-  displaySuccess
+  /// Ad had been loaded
+  loadedSuccess,
+
+  /// Ads disabled programmatically
+  displayDeniedProgrammatically,
 }
