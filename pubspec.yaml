@@ -1,12 +1,12 @@
 name: gdpr_ads
 description: GDPR service, GDPR intermediate screen, Admob manager for loading and displaying 
-version: 0.1.0+1
+version: 0.1.0+2
 homepage: https://github.com/xErik/gdpr_ads/
 issues: https://github.com/xErik/gdpr_ads/issues
 
 environment:
-  sdk: '>=3.1.2 <4.0.0'
-  flutter: ">=1.17.0"
+  sdk: '>=3.1.1 <4.0.0'
+  flutter: ">=3.13.4"
 
 dependencies:
   async_preferences: ^0.8.0

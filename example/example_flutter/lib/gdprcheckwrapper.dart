@@ -41,43 +41,43 @@ class GdprCheckWrapper extends StatelessWidget {
         testDeviceIds: Config.testDeviceIds);
   }
 
+  /// Displays an GDPR initial dialog
+  /// It will only display the dialog if not prior GDPR has been collected.
+  Widget _gdprPage(BuildContext context) {
+    return GdprPage(
+      () async => _initAdmob(),
+      () {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const AfterGdprPage()),
+        );
+      },
+      debugTestIdentifiers: Config.testDeviceIds,
+      showDebugUI: kDebugMode,
+      debugResetConsentForm: resetConfirmationForm,
+      loadingWidget: const Center(child: CircularProgressIndicator()),
+      debugGeography: GdprDebugGeography.disabled,
+    );
+  }
+
+  /// Displays an GDPR update consent form.
+  /// it will always display the dialog.
+  Widget _gdprUpdatePage(BuildContext context) {
+    return GdprUpdatePage(
+      () async => _initAdmob(),
+      () {
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const AfterGdprPage()));
+      },
+      debugTestIdentifiers: Config.testDeviceIds,
+      showDebugUI: kDebugMode,
+      loadingWidget: const Center(child: CircularProgressIndicator()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return showUpdateConsentForm == false
-        ?
-        // ---------------------------------------------------------------
-        // SHOWS AN INITIAL CONSENT FORM
-        //
-        // IT WILL ONLY SHOW IF NO CONSENT HAS BEEN GIVEN PRIOR
-        // ---------------------------------------------------------------
-        GdprPage(
-            () async => _initAdmob(),
-            () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => const AfterGdprPage()),
-              );
-            },
-            debugTestIdentifiers: Config.testDeviceIds,
-            showDebugUI: kDebugMode,
-            debugResetConsentForm: resetConfirmationForm,
-            loadingWidget: const Center(child: CircularProgressIndicator()),
-            debugGeography: GdprDebugGeography.disabled,
-          )
-        :
-        // ---------------------------------------------------------------
-        // SHOWS AN UPDATE CONSENT FORM
-        //
-        // IT WILL ALLWAYS SHOW
-        // ---------------------------------------------------------------
-        GdprUpdatePage(
-            () async => _initAdmob(),
-            () {
-              Navigator.of(context).pushReplacement(MaterialPageRoute(
-                  builder: (context) => const AfterGdprPage()));
-            },
-            debugTestIdentifiers: Config.testDeviceIds,
-            showDebugUI: kDebugMode,
-            loadingWidget: const Center(child: CircularProgressIndicator()),
-          );
+        ? _gdprPage(context)
+        : _gdprUpdatePage(context);
   }
 }
