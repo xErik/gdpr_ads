@@ -1,6 +1,6 @@
 name: gdpr_ads
 description: GDPR service, GDPR intermediate screen, Admob manager for loading and displaying 
-version: 0.1.0
+version: 0.1.0+1
 homepage: https://github.com/xErik/gdpr_ads/
 issues: https://github.com/xErik/gdpr_ads/issues
 

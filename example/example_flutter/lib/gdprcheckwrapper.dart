@@ -33,6 +33,14 @@ class GdprCheckWrapper extends StatelessWidget {
       Key? key})
       : super(key: key);
 
+  void _initAdmob() {
+    AdService().initialize(
+        bannerIds: [Config.bannerAdId],
+        interstitialIds: [Config.interstitialAdId],
+        interRewardIds: [Config.interRewardAdId],
+        testDeviceIds: Config.testDeviceIds);
+  }
+
   @override
   Widget build(BuildContext context) {
     return showUpdateConsentForm == false
@@ -43,13 +51,7 @@ class GdprCheckWrapper extends StatelessWidget {
         // IT WILL ONLY SHOW IF NO CONSENT HAS BEEN GIVEN PRIOR
         // ---------------------------------------------------------------
         GdprPage(
-            () async {
-              AdService().initialize(
-                  bannerIds: [Config.bannerAdId],
-                  interstitialIds: [Config.interstitialAdId],
-                  interRewardIds: [Config.interRewardAdId],
-                  testDeviceIds: Config.testDeviceIds);
-            },
+            () async => _initAdmob(),
             () {
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (context) => const AfterGdprPage()),
@@ -68,13 +70,7 @@ class GdprCheckWrapper extends StatelessWidget {
         // IT WILL ALLWAYS SHOW
         // ---------------------------------------------------------------
         GdprUpdatePage(
-            () async {
-              AdService().initialize(
-                  bannerIds: [Config.bannerAdId],
-                  interstitialIds: [Config.interstitialAdId],
-                  interRewardIds: [Config.interRewardAdId],
-                  testDeviceIds: Config.testDeviceIds);
-            },
+            () async => _initAdmob(),
             () {
               Navigator.of(context).pushReplacement(MaterialPageRoute(
                   builder: (context) => const AfterGdprPage()));
