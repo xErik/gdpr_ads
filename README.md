@@ -4,7 +4,7 @@ GDPR service, GDPR intermediate screen, Admob manager for loading and displaying
 
 1. GDPR interceptor widget suitable for App startup.
 2. GDPR service.
-3. Ad service for loading and displaying ads.
+3. Ad service for loading and displaying Ads.
 4. In Flutter Web the GDPR step and the Ads are automatically excluded.
 
 ## Getting started
@@ -136,7 +136,7 @@ Scaffold(body:
 
 ## Usage
 
-The example folder contains a complete example (it will run on the web, too, but show no ads). Set your test device ID before running it. Refrain from hitting the Interstitial buttons too quickly in a row, it will trigger a new fetch at the moment.
+The example folder contains a complete example (it will run on the web, too, but show no ads). Set your test device ID before running it, the Ad units can stay as they are. Refrain from hitting the Interstitial buttons too quickly in a row, it will trigger a new fetch at the moment. 
 
 ### The GDPR page and service
 
