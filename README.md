@@ -1,4 +1,4 @@
-GDPR service, GDPR intermediate screen, Ad manager for loading and displaying Google Admob ads
+GDPR service, GDPR intermediate screen, Admob manager for loading and displaying 
 
 ## Features
 
@@ -32,13 +32,14 @@ class MainApp extends StatelessWidget {
           // It will not be called in case of technical 
           // errors etc.
           //
-          // (This will work even if the user has DENIED GDPR,
-          // Admob will then not deliver ads.)
+          // This works even if the user has DENIED GDPR:
+          // Admob will then not deliver ads and return error 3/no-fill.
           //
-          AdService().setTestDeviceIds(Config.testDeviceIds);
-          await AdService().addBanner([Config.bannerAdId]);
-          await AdService().addInterstitialRewarded([Config.interRewardAdId]);
-          await AdService().addInterstitial([Config.interstitialAdId]);
+          AdService().initialize(
+            bannerIds: [Config.bannerAdId],
+            interstitialIds: [Config.interstitialAdId],
+            interRewardIds: [Config.interRewardAdId],
+            testDeviceIds: Config.testDeviceIds);
         },
         () {
           //
@@ -68,60 +69,60 @@ class MainApp extends StatelessWidget {
 **... and show ads**
 
 ```dart
-Scaffold(body:AdBanner())
+Scaffold(body:AdBanner(String? adUnitId))
 
 // Or
 
-final ResponseInterstitial? result 
-  = await AdService().showInterstitial();
+final ResponseInterstitial result 
+  = await AdService().showInterstitial(String? adUnitId);
 ```
 
 ## Usage
 
-The example folder contains a complete example (which will run on the web, too, but show no ads). Add your test device ID before running it. Refrain from hitting the Intertestial buttons to often, Admob will deny too many requests. 
+The example folder contains a complete example (it will run on the web, too, but show no ads). Add your test device ID before running it. Refrain from hitting the Interstitial buttons too often, it will trigger a new fetch and Admob will deny too many requests.
 
 ### The GDPR page and service
 
-The GDPR page makes use of the GDPR service. 
+The GDPR page uses the GDPR service. 
 
 Make the GDPR widget the initial screen / home screen of the app and it will display or not display GDPR dialogs as necessary. The widget offers debug configuration options like resetting the GDPR consent.
 
-Alternativly, user the GDPR service for a custom solution.
+Alternatively, use the GDPR service for a custom solution.
 
 ### The Ads service
 
-The Ads service needs to get initialized once and is then used to display Ads. It attempts to load Ads in the background when needed.
+The Ads service needs to get initialized once and is then tasked to display Ads. It attempts to prefetch Ads in the background. Admob may not always return Ads, based on its internal bidding system and / or the number of requests.  
 
 ```dart
-AdService(testDeviceIds: Config.testDeviceIds);
-AdService().initBanner([Config.bannerAdId]);
-AdService().initInterstitialRewarded([Config.interRewardAdId]);
-AdService().initInterstitial[(Config.interstitialAdId]);
+AdService().initialize(
+  bannerIds: [Config.bannerAdId],
+  interstitialIds: [Config.interstitialAdId],
+  interRewardIds: [Config.interRewardAdId],
+  testDeviceIds: Config.testDeviceIds);
 ```
 
-Show ads after [AdService] has been initialized:
+Show ads after [AdService] has been initialized. The optional parameter [adUnitId] 
+allows for selecting a specific Admob-Ad-ID, if not given the first found Ad will 
+be shown or returned.  
 
 ```dart
 // Will render the banner directly
-Scaffold(body:AdBanner()),
+Scaffold(body:AdBanner(String? adUnitId)),
 ```
 
 ```dart
 // Will attempt to show an ad.
 // Returns status information about the result.
-// If [adunitId] is NULL the first ad is selected.
-final ResponseInterstitial? result 
+final ResponseInterstitial result 
   = await AdService().showInterstitial(String? adUnitId);
 
 // Will attempt to show a dialog and then the rewarded ad.
 // Returns status information about the result.
-// If [adunitId] is NULL the first ad is selected.
-final ResponseInterstitialRewarded? result 
+final ResponseInterstitialRewarded result 
   = await AdService().showInterstitialRewarded(context, String? adUnitId);
 
 // Will return the banner and status information.
-// If [adunitId] is NULL the first ad is selected.
-final ResponseBanner? result 
+final ResponseBanner result 
   = await AdService().showBanner(String? adUnitId);
 ```
 
@@ -163,10 +164,11 @@ class MainApp extends StatelessWidget {
           // (This does work even if the user has declined GDPR,
           // as Admob will then not deliver ads.)
           //
-          AdService().setTestDeviceIds(Config.testDeviceIds);
-          await AdService().addBanner([Config.bannerAdId]);
-          await AdService().addInterstitialRewarded([Config.interRewardAdId]);
-          await AdService().addInterstitial([Config.interstitialAdId]);
+          AdService().initialize(
+            bannerIds: [Config.bannerAdId],
+            interstitialIds: [Config.interstitialAdId],
+            interRewardIds: [Config.interRewardAdId],
+            testDeviceIds: Config.testDeviceIds);
         },
         () {
           //
@@ -193,11 +195,11 @@ class MainApp extends StatelessWidget {
 }
 ```
 
-### TODO
+## TODO
 
 Rate limit Interstitial and InterstitialRewarded ads, at the moment each invocation
 will trigger a new fetch over the internet. The loading status should be internally 
-recognized and a appropirate repsonse should be returned. 
+tracked and a appropirate repsonse should be returned. 
 
 ## Additional information
 

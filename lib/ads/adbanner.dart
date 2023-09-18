@@ -17,14 +17,17 @@ class AdBanner extends StatelessWidget {
   final Widget widgetBelowIfAddIsShown;
   final Widget widgetAboveIfAddIsShown;
   final Color backgroundColor;
-  final Future<ResponseBanner> future = AdService().getBanner();
+  late final Future<ResponseBanner> future;
 
   AdBanner(
-      {this.widgetAboveIfAddIsShown = const SizedBox.shrink(),
+      {String? adUnitId,
+      this.widgetAboveIfAddIsShown = const SizedBox.shrink(),
       this.widgetBelowIfAddIsShown = const SizedBox.shrink(),
       this.backgroundColor = Colors.white,
       Key? key})
-      : super(key: key);
+      : super(key: key) {
+    future = AdService().getBanner(adUnitId: adUnitId);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,8 +39,7 @@ class AdBanner extends StatelessWidget {
           return const SizedBox.shrink();
         } else if (snapshot.data!.hasAd() == false) {
           if (kDebugMode) {
-            return _debugLabel(
-                'No banner loaded, because: ${snapshot.data!.status.name}');
+            return _debugLabel(snapshot.data!.prettyError());
           }
           return const SizedBox.shrink();
         }

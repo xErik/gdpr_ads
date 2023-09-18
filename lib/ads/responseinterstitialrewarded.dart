@@ -24,10 +24,20 @@ class ResponseInterstitialRewarded {
   StatusInterstitialRewarded status;
   num? rewardAmount;
   String? rewardType;
+  int? admobErrorCode;
+  String? admobErrorMessage;
 
-  ResponseInterstitialRewarded(
-    this.status, {
-    this.rewardAmount,
-    this.rewardType,
-  });
+  ResponseInterstitialRewarded(this.status,
+      {this.rewardAmount,
+      this.rewardType,
+      this.admobErrorCode,
+      this.admobErrorMessage});
+
+  String prettyError() {
+    String label = 'Admob Code:(none)\nAdmob Message:(none)';
+    if (admobErrorCode != null) {
+      label = 'Admob Code:$admobErrorCode\nAdmob Message:$admobErrorMessage';
+    }
+    return label;
+  }
 }

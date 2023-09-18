@@ -11,24 +11,10 @@ import 'dialogconfirmad.dart';
 class RewardedInterstitialInstance {
   Completer<ResponseInterstitialRewarded> _completer =
       Completer<ResponseInterstitialRewarded>();
-  String? _adUnitId;
+  final String _adUnitId;
   RewardedInterstitialAd? _adToShow;
 
-  /// Initializes [MobileAds].
-  Future<void> init(String adUnitId, {List<String>? testDeviceIds}) async {
-    if (kIsWeb == false) {
-      _adUnitId = adUnitId;
-      await MobileAds.instance.initialize();
-
-      final old = await MobileAds.instance.getRequestConfiguration();
-      final cnf = RequestConfiguration(
-          maxAdContentRating: old.maxAdContentRating,
-          tagForChildDirectedTreatment: old.tagForChildDirectedTreatment,
-          tagForUnderAgeOfConsent: old.tagForUnderAgeOfConsent,
-          testDeviceIds: testDeviceIds);
-      await MobileAds.instance.updateRequestConfiguration(cnf);
-    }
-  }
+  RewardedInterstitialInstance(this._adUnitId);
 
   /// Shows a confirmation dialog, if user confirms the ad is shown.
   /// The confirmation dialog is not shown in case the ad is not loaded.
@@ -82,22 +68,25 @@ class RewardedInterstitialInstance {
           StatusInterstitialRewarded.notLoadedOnWeb));
       _log(
           'Aborted loading RewardedInterstitialAd: ads not available on the web');
-    } else if (_adUnitId == null) {
-      _completer.complete(ResponseInterstitialRewarded(
-          StatusInterstitialRewarded.notLoadedAdIdNotSet));
-      _log(
-          'Aborted loading RewardedInterstitialAd: init() not called, GDPR denied or error?');
+      // } else if (_adUnitId == null) {
+      //   _completer.complete(ResponseInterstitialRewarded(
+      //       StatusInterstitialRewarded.notLoadedAdIdNotSet));
+      //   _log(
+      //       'Aborted loading RewardedInterstitialAd: GDPR denied or error?');
     } else {
       _log('Loading RewardedInterstitialAd...');
 
       RewardedInterstitialAd.load(
-        adUnitId: _adUnitId!,
+        adUnitId: _adUnitId,
         request: const AdRequest(),
         rewardedInterstitialAdLoadCallback: RewardedInterstitialAdLoadCallback(
           onAdLoaded: (ad) {
             ad.fullScreenContentCallback = FullScreenContentCallback(
                 // Called when the ad showed the full screen content.
-                onAdShowedFullScreenContent: (ad) {},
+                onAdShowedFullScreenContent: (ad) {
+                  _completer.complete(ResponseInterstitialRewarded(
+                      StatusInterstitialRewarded.displaySuccess));
+                },
                 // Called when an impression occurs on the ad.
                 onAdImpression: (ad) {},
                 // Called when the ad failed to show full screen content.
@@ -109,8 +98,6 @@ class RewardedInterstitialInstance {
                 // Called when the ad dismissed full screen content.
                 onAdDismissedFullScreenContent: (ad) {
                   ad.dispose();
-                  _completer.complete(ResponseInterstitialRewarded(
-                      StatusInterstitialRewarded.displayDeniedByUser));
                 },
                 // Called when a click is recorded for an ad.
                 onAdClicked: (ad) {});
@@ -122,7 +109,9 @@ class RewardedInterstitialInstance {
             _log(
                 'RewardedInterstitialAd failed to load: ${error.code} ${error.message}');
             _completer.complete(ResponseInterstitialRewarded(
-                StatusInterstitialRewarded.notLoadedGenerally));
+                StatusInterstitialRewarded.notLoadedGenerally,
+                admobErrorCode: error.code,
+                admobErrorMessage: error.message));
           },
         ),
       );

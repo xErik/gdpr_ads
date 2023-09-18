@@ -4,10 +4,21 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 class ResponseBanner {
   StatusBanner status;
   BannerAd? ad;
+  int? admobErrorCode;
+  String? admobErrorMessage;
 
-  ResponseBanner(this.status, {this.ad});
+  ResponseBanner(this.status,
+      {this.ad, this.admobErrorCode, this.admobErrorMessage});
 
   bool hasAd() => ad != null;
+
+  String prettyError() {
+    String label = 'No banner loaded, because: ${status.name}';
+    if (admobErrorCode != null) {
+      label += ' code:$admobErrorCode message:$admobErrorMessage';
+    }
+    return label;
+  }
 }
 
 /// The interstitial-rewared-ad can return all values.

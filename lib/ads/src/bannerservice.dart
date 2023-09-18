@@ -10,26 +10,11 @@ import '../responsebanner.dart';
 class BannerServiceInstance {
   Completer<ResponseBanner> _completer = Completer<ResponseBanner>();
 
-  /// Is NULL if [init] has not been called due to GDPR denial
-  String? _adUnitId;
+  final String _adUnitId;
 
-  /// Initializes [MobileAds].
-  Future<void> init(String adUnitId, {List<String>? testDeviceIds}) async {
-    if (kIsWeb == false) {
-      _adUnitId = adUnitId;
-      await MobileAds.instance.initialize();
+  BannerServiceInstance(this._adUnitId);
 
-      final old = await MobileAds.instance.getRequestConfiguration();
-      final cnf = RequestConfiguration(
-          maxAdContentRating: old.maxAdContentRating,
-          tagForChildDirectedTreatment: old.tagForChildDirectedTreatment,
-          tagForUnderAgeOfConsent: old.tagForUnderAgeOfConsent,
-          testDeviceIds: testDeviceIds);
-      await MobileAds.instance.updateRequestConfiguration(cnf);
-    }
-  }
-
-  /// Call [init] and [fetchAd] before calling this method.
+  /// Call [fetchAd] before calling this method.
   Future<ResponseBanner> getAd() async => _completer.future;
 
   /// Fetches an ad in the background.
@@ -39,14 +24,10 @@ class BannerServiceInstance {
     if (kIsWeb == true) {
       _completer.complete(ResponseBanner(StatusBanner.notLoadedOnWeb));
       _log('Aborted loading BannerAd: ads not available on the web');
-    } else if (_adUnitId == null) {
-      _completer.complete(ResponseBanner(StatusBanner.notLoadedAdIdNotSet));
-      _log(
-          'Aborted loading BannerAd: init() not called, GDPR denied or error?');
     } else {
       // no await
       BannerAd(
-        adUnitId: _adUnitId!,
+        adUnitId: _adUnitId,
         size: AdSize.banner,
         request: const AdRequest(),
         listener: BannerAdListener(
@@ -57,8 +38,9 @@ class BannerServiceInstance {
           },
           onAdFailedToLoad: (ad, error) {
             ad.dispose();
-            _completer
-                .complete(ResponseBanner(StatusBanner.notLoadedGenerally));
+
+            _completer.complete(ResponseBanner(StatusBanner.notLoadedGenerally,
+                admobErrorCode: error.code, admobErrorMessage: error.message));
             _log('BannerAd failed to load: ${error.code} ${error.message}');
           },
         ),

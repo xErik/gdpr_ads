@@ -122,8 +122,15 @@ class AfterGdprState extends State<AfterGdprPage> {
   }
 
   String _prettyInterStatus() {
-    final res = '''
-Status: ${interResponse == null ? '(ads disabled or not called)' : interResponse!.status.name}''';
+    String res = '''Status: (ads disabled or not called)''';
+
+    if (interResponse != null) {
+      res = '''
+Status: ${interResponse!.status.name}
+Error Code: ${interResponse!.prettyError()}
+''';
+    }
+
     return res;
   }
 
@@ -131,13 +138,14 @@ Status: ${interResponse == null ? '(ads disabled or not called)' : interResponse
     String res = '''
 Status: (ads disabled or not called)
 Reward amount: (ads disabled or not called)
-Reward type: (ads disabled or not called)''';
+Reward type: (ads disabled or not called)}''';
 
     if (interRewardedResponse != null) {
       res = '''
 Status: ${interRewardedResponse!.status.name}
 Reward amount: ${interRewardedResponse!.rewardAmount}
-Reward type: ${interRewardedResponse!.rewardType}''';
+Reward type: ${interRewardedResponse!.rewardType}
+${interRewardedResponse!.prettyError()}''';
     }
 
     return res;

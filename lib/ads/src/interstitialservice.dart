@@ -9,41 +9,29 @@ import '../responseinterstitial.dart';
 class InterstitialServiceInstance {
   Completer<ResponseInterstitial> _completer =
       Completer<ResponseInterstitial>();
-  String? _adUnitId;
+  final String _adUnitId;
   InterstitialAd? _adToShow;
 
-  /// Initializes [MobileAds].
-  Future<void> init(String adUnitId, {List<String>? testDeviceIds}) async {
-    if (kIsWeb == false) {
-      _adUnitId = adUnitId;
-      await MobileAds.instance.initialize();
-
-      final old = await MobileAds.instance.getRequestConfiguration();
-      final cnf = RequestConfiguration(
-          maxAdContentRating: old.maxAdContentRating,
-          tagForChildDirectedTreatment: old.tagForChildDirectedTreatment,
-          tagForUnderAgeOfConsent: old.tagForUnderAgeOfConsent,
-          testDeviceIds: testDeviceIds);
-      await MobileAds.instance.updateRequestConfiguration(cnf);
-    }
-  }
+  InterstitialServiceInstance(this._adUnitId);
 
   /// Shows a confirmation dialog, if the user confirms it the ad is shown.
   /// The returned [ResponseInterstitial] details the ourtcome.
   ///
   /// Call [fetchAd] before calling this method.
   Future<ResponseInterstitial> showAd() async {
-    if (_adToShow == null) {
-      _completer.complete(
-          ResponseInterstitial(StatusInterstitial.notLoadedGenerally));
-    } else if (_adToShow != null) {
-      await _adToShow?.show();
+    if (_completer.isCompleted == false) {
+      if (_adToShow == null) {
+        _completer.complete(
+            ResponseInterstitial(StatusInterstitial.notLoadedGenerally));
+      } else if (_adToShow != null) {
+        await _adToShow?.show();
 
-      // The ad may have been dismissed by user and the
-      // completer already completed with that status.
-      if (_completer.isCompleted == false) {
-        _completer
-            .complete(ResponseInterstitial(StatusInterstitial.displaySuccess));
+        // The ad may have been dismissed by user and the
+        // completer already completed with that status.
+        if (_completer.isCompleted == false) {
+          _completer.complete(
+              ResponseInterstitial(StatusInterstitial.displaySuccess));
+        }
       }
     }
 
@@ -59,16 +47,11 @@ class InterstitialServiceInstance {
       _completer
           .complete(ResponseInterstitial(StatusInterstitial.notLoadedOnWeb));
       _log('Aborted loading InterstitialAd: ads not available on the web');
-    } else if (_adUnitId == null) {
-      _completer.complete(
-          ResponseInterstitial(StatusInterstitial.notLoadedAdIdNotSet));
-      _log(
-          'Aborted loading InterstitialAd: init() not called, GDPR denied or error?');
     } else {
       _log('Loading InterstitialAd');
 
       InterstitialAd.load(
-        adUnitId: _adUnitId!,
+        adUnitId: _adUnitId,
         request: const AdRequest(),
         adLoadCallback: InterstitialAdLoadCallback(
           onAdLoaded: (ad) {
@@ -99,8 +82,10 @@ class InterstitialServiceInstance {
           onAdFailedToLoad: (error) {
             _log(
                 'InterstitialAd failed to load: ${error.code} ${error.message}');
-            _completer.complete(
-                ResponseInterstitial(StatusInterstitial.notLoadedGenerally));
+            _completer.complete(ResponseInterstitial(
+                StatusInterstitial.notLoadedGenerally,
+                admobErrorCode: error.code,
+                admobErrorMessage: error.message));
           },
         ),
       );

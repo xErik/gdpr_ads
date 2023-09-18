@@ -17,10 +17,11 @@ class GdprCheckWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return GdprPage(
       () async {
-        AdService().setTestDeviceIds(Config.testDeviceIds);
-        await AdService().addBanner([Config.bannerAdId]);
-        await AdService().addInterstitialRewarded([Config.interRewardAdId]);
-        await AdService().addInterstitial([Config.interstitialAdId]);
+        AdService().initialize(
+            bannerIds: [Config.bannerAdId],
+            interstitialIds: [Config.interstitialAdId],
+            interRewardIds: [Config.interRewardAdId],
+            testDeviceIds: Config.testDeviceIds);
       },
       () {
         Navigator.of(context).pushReplacement(

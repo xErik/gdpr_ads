@@ -33,5 +33,5 @@ class Config {
       ? "ca-app-pub-3940256099942544/1033173712"
       : "ca-app-pub-5692132423340230/7671201992";
 
-  static List<String>? get testDeviceIds => ConfigIgnored.testDeviceIds;
+  static List<String> get testDeviceIds => ConfigIgnored.testDeviceIds;
 }
