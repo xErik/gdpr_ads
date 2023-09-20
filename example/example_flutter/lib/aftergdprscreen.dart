@@ -4,16 +4,16 @@ import 'package:gdpr_ads/ads/adbanner.dart';
 import 'package:gdpr_ads/ads/adservice.dart';
 import 'package:gdpr_ads/ads/responseinterstitial.dart';
 import 'package:gdpr_ads/ads/responseinterstitialrewarded.dart';
-import 'package:gdpr_ads/gdpr/gdprpagemanager.dart';
+import 'package:gdpr_ads/gdpr/gdprscreenmanager.dart';
 
-class AfterGdprPage extends StatefulWidget {
-  const AfterGdprPage({Key? key}) : super(key: key);
+class AfterGdprScreen extends StatefulWidget {
+  const AfterGdprScreen({Key? key}) : super(key: key);
 
   @override
   AfterGdprState createState() => AfterGdprState();
 }
 
-class AfterGdprState extends State<AfterGdprPage> {
+class AfterGdprState extends State<AfterGdprScreen> {
   ResponseInterstitialRewarded? interRewardedResponse;
   ResponseInterstitial? interResponse;
 
@@ -21,7 +21,7 @@ class AfterGdprState extends State<AfterGdprPage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(title: const Text('Page following GDPR-Page')),
+        appBar: AppBar(title: const Text('Screen following GDPR-Screen')),
         body: ListView(
           padding: const EdgeInsets.all(16),
           children: [
@@ -78,7 +78,7 @@ class AfterGdprState extends State<AfterGdprPage> {
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
                         builder: (context) =>
-                            GdprPageManager.singleton.initialPage(),
+                            GdprScreenManager.initialGdprScreen(),
                       ),
                     );
                   },
@@ -98,7 +98,7 @@ class AfterGdprState extends State<AfterGdprPage> {
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
                         builder: (context) =>
-                            GdprPageManager.singleton.initialPageReset(),
+                            GdprScreenManager.initialResetGdprScreen(),
                       ),
                     );
                   },
@@ -117,7 +117,7 @@ class AfterGdprState extends State<AfterGdprPage> {
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
                         builder: (context) =>
-                            GdprPageManager.singleton.updatePage(),
+                            GdprScreenManager.updateGdprScreen(),
                       ),
                     );
                   },
@@ -172,11 +172,13 @@ ${interRewardedResponse!.prettyError()}''';
   }
 
   Future<void> _showInterRewardedAd(BuildContext context) async {
+    setState(() => interRewardedResponse = null);
     final result = await AdService().showInterstitialRewarded(context);
     setState(() => interRewardedResponse = result);
   }
 
   Future<void> _showInterAd() async {
+    setState(() => interResponse = null);
     final result = await AdService().showInterstitial();
     setState(() => interResponse = result);
   }

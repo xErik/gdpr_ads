@@ -6,7 +6,7 @@ import 'gdprservice.dart';
 /// Checks if a consent is necessary. Use this widget along these lines:
 ///
 /// ```dart
-/// [GdprUpdatePage](
+/// [GdprUpdateScreen](
 ///   () async => await MobileAds.instance.initialize(),
 ///   () => Navigator.of(context).pushReplacement(
 ///        MaterialPageRoute(builder: (context) => YourNextWidget()),
@@ -22,7 +22,7 @@ import 'gdprservice.dart';
 /// Debug parameters are supported:
 ///
 /// ```dart
-/// [GdprInitialPage](
+/// [GdprInitialScreen](
 ///   () async => await MobileAds.instance.initialize(),
 ///   () => Navigator.of(context).pushReplacement(
 ///        MaterialPageRoute(builder: (context) => YourNextWidget()),
@@ -41,14 +41,14 @@ import 'gdprservice.dart';
 /// If on web:
 ///
 /// 1. Executes user defined navigation method, as there are no ads for the web.
-class GdprUpdatePage extends StatefulWidget {
-  final AsyncCallback onConsentGivenInitMethod;
-  final VoidCallback onNavigationMethod;
+class GdprUpdateScreen extends StatefulWidget {
+  final VoidCallback onConsentGivenInitMethod;
+  final Function(BuildContext) onNavigationMethod;
   final Widget loadingWidget;
   final List<String>? debugTestIdentifiers;
   final bool showDebugUI;
 
-  const GdprUpdatePage(
+  const GdprUpdateScreen(
     this.onConsentGivenInitMethod,
     this.onNavigationMethod, {
     this.loadingWidget = const Center(child: CircularProgressIndicator()),
@@ -59,10 +59,10 @@ class GdprUpdatePage extends StatefulWidget {
 
   @override
   // ignore: library_private_types_in_public_api
-  createState() => _GdprUpdatePageState();
+  createState() => _GdprUpdateScreenState();
 }
 
-class _GdprUpdatePageState extends State<GdprUpdatePage> {
+class _GdprUpdateScreenState extends State<GdprUpdateScreen> {
   GdprResult? gdprResult;
 
   @override
@@ -71,7 +71,7 @@ class _GdprUpdatePageState extends State<GdprUpdatePage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (kIsWeb) {
-        widget.onNavigationMethod.call();
+        widget.onNavigationMethod.call(context);
       } else {
         final GdprResult result = await GdprService.updateConsentForm(
             testIdentifiers: widget.debugTestIdentifiers);
@@ -81,11 +81,11 @@ class _GdprUpdatePageState extends State<GdprUpdatePage> {
         });
 
         if (result.isSuccess()) {
-          await widget.onConsentGivenInitMethod.call();
+          widget.onConsentGivenInitMethod.call();
         }
 
         if (widget.showDebugUI == false) {
-          widget.onNavigationMethod.call();
+          if (context.mounted) widget.onNavigationMethod.call(context);
         }
       }
     });
@@ -134,7 +134,7 @@ class _GdprUpdatePageState extends State<GdprUpdatePage> {
                   const SizedBox(height: 32),
                 ],
                 ElevatedButton(
-                    onPressed: () => widget.onNavigationMethod.call(),
+                    onPressed: () => widget.onNavigationMethod.call(context),
                     child: const Text('Navigate to next page')),
               ],
             ],

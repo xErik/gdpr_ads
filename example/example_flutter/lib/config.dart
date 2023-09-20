@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 import 'config_ignored.dart';
 
 class Config {
@@ -21,17 +19,12 @@ class Config {
   /// Native Advanced 	ca-app-pub-3940256099942544/2247696110
   /// Native Advanced Video 	ca-app-pub-3940256099942544/1044960115
 
-  static String get interRewardAdId => kDebugMode
-      ? "ca-app-pub-3940256099942544/5354046379"
-      : "ca-app-pub-5692132423340230/1297365339";
+  static String get interRewardAdId => "ca-app-pub-3940256099942544/5354046379";
 
-  static String get bannerAdId => kDebugMode
-      ? "ca-app-pub-3940256099942544/6300978111"
-      : "ca-app-pub-5692132423340230/3568305459";
+  static String get bannerAdId => "ca-app-pub-3940256099942544/6300978111";
 
-  static String get interstitialAdId => kDebugMode
-      ? "ca-app-pub-3940256099942544/1033173712"
-      : "ca-app-pub-5692132423340230/7671201992";
+  static String get interstitialAdId =>
+      "ca-app-pub-3940256099942544/1033173712";
 
   static List<String> get testDeviceIds => ConfigIgnored.testDeviceIds;
 }

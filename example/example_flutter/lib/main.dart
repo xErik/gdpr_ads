@@ -1,8 +1,8 @@
-import 'package:example_flutter/aftergdprcheck.dart';
+import 'package:example_flutter/aftergdprscreen.dart';
 import 'package:example_flutter/config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:gdpr_ads/gdpr/gdprpagemanager.dart';
+import 'package:gdpr_ads/gdpr/gdprscreenmanager.dart';
 import 'package:gdpr_ads/gdpr/gdprservice.dart';
 
 void main() async {
@@ -16,9 +16,9 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: GdprPageManager(
-        () => Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const AfterGdprPage())),
+      home: GdprScreenManager(
+        (BuildContext context) => Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const AfterGdprScreen())),
         bannerIds: [Config.bannerAdId],
         interstitialIds: [Config.interstitialAdId],
         interRewardIds: [Config.interRewardAdId],
@@ -26,7 +26,7 @@ class MainApp extends StatelessWidget {
         debugShowDebugUI: kDebugMode,
         loadingWidget: const Center(child: CircularProgressIndicator()),
         debugGeography: GdprDebugGeography.disabled,
-      ).initialPage(),
+      ).getInitialGdprScreen(),
     );
   }
 }

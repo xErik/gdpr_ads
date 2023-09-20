@@ -1,73 +1,3 @@
-# Example
-
-There are two methods of using this package. Both aim at having
-the GDPR and Ads configuration in one place. Loading and showing 
-Ads works the same for the two methods.
-
-The first one is using the [GdprScreenManager] and is recommended.
-
-The other is to create a [GdprScreenWrapper] yourself.
-
-## GDPR Screen Manager
-
-<include file="example_flutter/lib/main.dart">
-
-```dart
-import 'package:example_flutter/aftergdprscreen.dart';
-import 'package:example_flutter/config.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:gdpr_ads/gdpr/gdprscreenmanager.dart';
-import 'package:gdpr_ads/gdpr/gdprservice.dart';
-
-void main() async {
-  runApp(const MainApp());
-}
-
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: GdprScreenManager(
-        (BuildContext context) => Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const AfterGdprScreen())),
-        bannerIds: [Config.bannerAdId],
-        interstitialIds: [Config.interstitialAdId],
-        interRewardIds: [Config.interRewardAdId],
-        debugTestDeviceIds: Config.testDeviceIds,
-        debugShowDebugUI: kDebugMode,
-        loadingWidget: const Center(child: CircularProgressIndicator()),
-        debugGeography: GdprDebugGeography.disabled,
-      ).getInitialGdprScreen(),
-    );
-  }
-}
-```
-</include>
-
-How to show an GdprScreen:
-
-```dart
-Scaffold(body:
-  GdprScreenManager.getInitialGdprScreen());
-
-Scaffold(body:
-  GdprScreenManager.getInitialResetGdprScreen());
-
-Scaffold(body:
-  GdprScreenManager.getUpdateGdprScreen());
-```
-
-## GDPR Screen Wrapper
-
-The widget below is a simple wrapper to make [GdprInitialScreen] and [GdprUpdateScreen] reusable with the same configuration.
-
-<include file="example_flutter/lib/gdprscreenwrapper.dart">
-
-```dart
 import 'package:example_flutter/aftergdprscreen.dart';
 import 'package:example_flutter/config.dart';
 import 'package:flutter/foundation.dart';
@@ -152,5 +82,3 @@ class GdprScreenWrapper extends StatelessWidget {
         : _gdprUpdateScreen(context);
   }
 }
-```
-</include>

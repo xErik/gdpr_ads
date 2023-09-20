@@ -9,14 +9,17 @@ enum StatusInterstitial {
   /// Service instance has no ad to load
   notLoadedAdIdNotSet,
 
+  /// If the ad is being loaded
+  notLoadedButTryingTo,
+
   /// Ad had been shown right now
   displaySuccess,
 
-  /// User denied seeing the ad in the confirmation dialog
-  // displayDeniedByUser,
-
   /// Ads disabled programmatically
   displayDeniedProgrammatically,
+
+  /// Ad failed to show for unspecific reason
+  displayFailedUnspecificReasons,
 }
 
 /// Response when failing or succeeding in showing an ad.

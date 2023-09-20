@@ -11,8 +11,13 @@ class InterstitialServiceInstance {
       Completer<ResponseInterstitial>();
   final String _adUnitId;
   InterstitialAd? _adToShow;
+  bool _isLoading = false;
+  // ignore: unused_field
+  bool _isShown = false;
 
   InterstitialServiceInstance(this._adUnitId);
+
+  bool get isFetching => _isLoading;
 
   /// Shows a confirmation dialog, if the user confirms it the ad is shown.
   /// The returned [ResponseInterstitial] details the ourtcome.
@@ -21,15 +26,15 @@ class InterstitialServiceInstance {
   Future<ResponseInterstitial> showAd() async {
     if (_completer.isCompleted == false) {
       if (_adToShow == null) {
+        _log('ad is NULL, early abort');
         _completer.complete(
             ResponseInterstitial(StatusInterstitial.notLoadedGenerally));
       } else if (_adToShow != null) {
         await _adToShow?.show();
+        _log('show() starting ... ');
 
-        // errors might occur during show() and complete the completer in fetchAd().
         if (_completer.isCompleted == false) {
-          _completer.complete(
-              ResponseInterstitial(StatusInterstitial.displaySuccess));
+          _isShown = true;
         }
       }
     }
@@ -40,46 +45,64 @@ class InterstitialServiceInstance {
   /// Fetches an ad in the background.
   /// No neet to `await` for it.
   void fetchAd() {
-    _completer = Completer<ResponseInterstitial>();
+    _log('Preparing to fetch...');
 
-    if (kIsWeb == true) {
+    if (_isLoading == true) {
+      _log('Already fetching, early abort');
+    } else if (kIsWeb == true) {
       _completer
           .complete(ResponseInterstitial(StatusInterstitial.notLoadedOnWeb));
-      _log('Aborted loading InterstitialAd: ads not available on the web');
+      _log('Ads not available on the web, early abort');
     } else {
-      _log('Loading InterstitialAd');
+      _completer = Completer<ResponseInterstitial>();
+      _isShown = false;
+      _adToShow = null;
+
+      _log('Fetching ...');
+      _isLoading = true;
 
       InterstitialAd.load(
         adUnitId: _adUnitId,
         request: const AdRequest(),
         adLoadCallback: InterstitialAdLoadCallback(
           onAdLoaded: (ad) {
-            ad.fullScreenContentCallback = FullScreenContentCallback(
-                // Called when the ad showed the full screen content.
-                onAdShowedFullScreenContent: (ad) {
-                  // success case is handled in showAd
-                },
-                // Called when an impression occurs on the ad.
-                onAdImpression: (ad) {},
-                // Called when the ad failed to show full screen content.
-                onAdFailedToShowFullScreenContent: (ad, err) {
-                  ad.dispose();
-                  _completer.complete(ResponseInterstitial(
-                      StatusInterstitial.notLoadedGenerally));
-                },
-                // Called when the ad dismissed full screen content.
-                onAdDismissedFullScreenContent: (ad) {
-                  ad.dispose();
-                },
-                // Called when a click is recorded for an ad.
-                onAdClicked: (ad) {});
-
+            _isLoading = false;
             _adToShow = ad;
-            _log('InterstitialAd loaded');
+            _log('Loaded');
+
+            ad.fullScreenContentCallback =
+                FullScreenContentCallback(onAdShowedFullScreenContent: (ad) {
+              _log('  - onAdShowedFullScreenContent');
+            }, onAdImpression: (ad) {
+              _log('  - onAdImpression');
+            }, onAdFailedToShowFullScreenContent: (ad, err) {
+              ad.dispose();
+              _log(
+                  '  - onAdFailedToShowFullScreenContent, completing: displayFailedUnspecificReasons');
+              _completer.complete(
+                  ResponseInterstitial(StatusInterstitial.notLoadedGenerally));
+            }, onAdDismissedFullScreenContent: (ad) {
+              ad.dispose();
+
+              if (_isShown = true) {
+                _log(
+                    '  - onAdDismissedFullScreenContent, completing with: displaySuccess');
+                _completer.complete(
+                    ResponseInterstitial(StatusInterstitial.displaySuccess));
+              } else {
+                _log(
+                    '  - onAdDismissedFullScreenContent, completing with: displayFailedUnspecificReasons');
+                _completer.complete(ResponseInterstitial(
+                    StatusInterstitial.displayFailedUnspecificReasons));
+              }
+            }, onAdClicked: (ad) {
+              _log('  - onAdClicked');
+            });
           },
           onAdFailedToLoad: (error) {
+            _isLoading = false;
             _log(
-                'InterstitialAd failed to load: ${error.code} ${error.message}');
+                'Failed to load: ${error.code} ${error.message}, completing: notLoadedGenerally');
             _completer.complete(ResponseInterstitial(
                 StatusInterstitial.notLoadedGenerally,
                 admobErrorCode: error.code,
@@ -90,5 +113,6 @@ class InterstitialServiceInstance {
     }
   }
 
-  void _log(String text) => log(text, name: runtimeType.toString());
+  void _log(String text) =>
+      kDebugMode ? log(text, name: runtimeType.toString()) : null;
 }

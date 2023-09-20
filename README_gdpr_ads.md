@@ -1,10 +1,22 @@
-# The GDPR page and service
+# Ad service
 
-The GDPR page uses the GDPR service. 
+The `AdService` gets initialized and is then shows Ads on request. It attempts to prefetch Ads in the background. Admob does not always return Ads, based on its internal bidding system or connection timeouts.
 
-Make the `GdprInitialPage` the initial screen / home screen of the app and it will display or not display GDPR dialogs as necessary. The page offers debug configuration options like resetting the GDPR consent.
+```dart
+AdService().initialize(
+  bannerIds: [Config.bannerAdId],
+  interstitialIds: [Config.interstitialAdId],
+  interRewardIds: [Config.interRewardAdId],
+  testDeviceIds: Config.testDeviceIds);
+```
 
-Use the `GdprUpdatePage` to show an update dialog. It will always display the dialog.
+# GDPR screen and service
+
+The GDPR screen uses the GDPR service. 
+
+Make the `GdprInitialScreen` the initial screen / home screen of the app and it will display or not display GDPR dialogs as necessary. The screen offers debug configuration options like resetting the GDPR consent.
+
+Use the `GdprUpdateScreen` to show an update dialog. It will always display the dialog.
 
 Alternatively, use the `GdprService` for a custom solution.
 
@@ -12,7 +24,7 @@ Alternatively, use the `GdprService` for a custom solution.
 
 ```dart
 Scaffold(body:
-  GdprInitialPage(
+  GdprInitialScreen(
     () async {
       AdService().initialize(
           bannerIds: [Config.bannerAdId],
@@ -20,10 +32,10 @@ Scaffold(body:
           interRewardIds: [Config.interRewardAdId],
           testDeviceIds: Config.testDeviceIds);
     },
-    () {
+    (BuildContext context) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-            builder: (context) => const AfterGdprPage())
+            builder: (context) => const AfterGdprScreen())
       );
     },
     debugTestIdentifiers: Config.testDeviceIds,
@@ -38,7 +50,7 @@ Scaffold(body:
 
 ```dart
 Scaffold(body:
-  GdprUpdatePage(
+  GdprUpdateScreen(
     () async {
       AdService().initialize(
           bannerIds: [Config.bannerAdId],
@@ -46,10 +58,10 @@ Scaffold(body:
           interRewardIds: [Config.interRewardAdId],
           testDeviceIds: Config.testDeviceIds);
     },
-    () {
+    (BuildContext context) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-            builder: (context) => const AfterGdprPage())
+            builder: (context) => const AfterGdprScreen())
       );
     },
     debugTestIdentifiers: Config.testDeviceIds,
@@ -60,47 +72,3 @@ Scaffold(body:
 );
 ```
 
-# The Ad service
-
-The `AdService` gets initialized and is then shows Ads on request. It attempts to prefetch Ads in the background. Admob does not always return Ads, based on its internal bidding system or connection timeouts.
-
-```dart
-AdService().initialize(
-  bannerIds: [Config.bannerAdId],
-  interstitialIds: [Config.interstitialAdId],
-  interRewardIds: [Config.interRewardAdId],
-  testDeviceIds: Config.testDeviceIds);
-```
-
-Show Ads after [AdService] has been initialized. The optional parameter [adUnitId] 
-allows for selecting a specific Admob-Ad-ID, if not given the first found Ad will 
-be shown (or returned).  
-
-```dart
-// Will render the Banner directly
-
-Scaffold(
-    body:
-        AdBanner(String? adUnitId),
-);
-```
-
-```dart
-// Attempts to show an Ad.
-// Returns status information about the result.
-
-final ResponseInterstitial result 
-  = await AdService().showInterstitial(String? adUnitId);
-
-// Attempts to show a confirmation dialog and then the rewarded Ad.
-// Returns status information about the result.
-
-final ResponseInterstitialRewarded result 
-  = await AdService().showInterstitialRewarded(context, String? adUnitId);
-
-// Will return the banner and status information.
-// No real need to use this, use [AdBanner] instead.
-
-final ResponseBanner result 
-  = await AdService().showBanner(String? adUnitId);
-```

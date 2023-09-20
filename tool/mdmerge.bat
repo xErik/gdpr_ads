@@ -1,0 +1,1 @@
+call dart run mdmerge include -i .\example\example.md --no-dry-run

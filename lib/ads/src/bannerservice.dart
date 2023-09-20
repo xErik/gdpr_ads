@@ -9,22 +9,32 @@ import '../responsebanner.dart';
 /// BannerService
 class BannerServiceInstance {
   Completer<ResponseBanner> _completer = Completer<ResponseBanner>();
+  bool _isLoading = false;
 
   final String _adUnitId;
 
   BannerServiceInstance(this._adUnitId);
+
+  bool get isFetching => _isLoading;
 
   /// Call [fetchAd] before calling this method.
   Future<ResponseBanner> getAd() async => _completer.future;
 
   /// Fetches an ad in the background.
   void fetchAd() {
-    _completer = Completer<ResponseBanner>();
+    _log('Preparing to fetch...');
 
-    if (kIsWeb == true) {
+    if (_isLoading == true) {
+      _log('Already fetching, early abort');
+    } else if (kIsWeb == true) {
       _completer.complete(ResponseBanner(StatusBanner.notLoadedOnWeb));
-      _log('Aborted loading BannerAd: ads not available on the web');
+      _log('ads not available on the web, early abort');
     } else {
+      _completer = Completer<ResponseBanner>();
+
+      _log('Fetching ...');
+      _isLoading = true;
+
       // no await
       BannerAd(
         adUnitId: _adUnitId,
@@ -32,21 +42,25 @@ class BannerServiceInstance {
         request: const AdRequest(),
         listener: BannerAdListener(
           onAdLoaded: (ad) {
+            _isLoading = false;
             _completer.complete(
                 ResponseBanner(StatusBanner.loadedSuccess, ad: ad as BannerAd));
-            _log('BannerAd loaded');
+            _log('Loaded, completing: loadedSuccess');
           },
           onAdFailedToLoad: (ad, error) {
+            _isLoading = false;
             ad.dispose();
 
             _completer.complete(ResponseBanner(StatusBanner.notLoadedGenerally,
                 admobErrorCode: error.code, admobErrorMessage: error.message));
-            _log('BannerAd failed to load: ${error.code} ${error.message}');
+            _log(
+                'Failed to load: ${error.code} ${error.message}, completing: notLoadedGenerally');
           },
         ),
       ).load();
     }
   }
 
-  void _log(String text) => log(text, name: runtimeType.toString());
+  void _log(String text) =>
+      kDebugMode ? log(text, name: runtimeType.toString()) : null;
 }

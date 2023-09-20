@@ -110,6 +110,7 @@ class AdService {
     }
 
     adUnitId ??= _bannerMap.keys.first;
+
     final result = await _bannerMap[adUnitId]!.getAd();
     _bannerMap[adUnitId]!.fetchAd(); // no await
     return result;
@@ -131,6 +132,12 @@ class AdService {
     }
 
     adUnitId ??= _interstitialRewardedMap.keys.first;
+
+    if (_interstitialRewardedMap[adUnitId]!.isFetching) {
+      return ResponseInterstitialRewarded(
+          StatusInterstitialRewarded.notLoadedButTryingTo);
+    }
+
     final result =
         await _interstitialRewardedMap[adUnitId]!.showConfirmAdDialog(context);
     _interstitialRewardedMap[adUnitId]!.fetchAd(); // no await
@@ -149,6 +156,11 @@ class AdService {
     }
 
     adUnitId ??= _intertsitialMap.keys.first;
+
+    if (_intertsitialMap[adUnitId]!.isFetching) {
+      return ResponseInterstitial(StatusInterstitial.notLoadedButTryingTo);
+    }
+
     final result = await _intertsitialMap[adUnitId]!.showAd();
     _intertsitialMap[adUnitId]!.fetchAd(); // no await
     return result;

@@ -1,50 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:gdpr_ads/ads/adservice.dart';
 import 'package:gdpr_ads/gdpr/gdprservice.dart';
-import 'package:gdpr_ads/gdpr/gdprupdatepage.dart';
+import 'package:gdpr_ads/gdpr/gdprupdatescreen.dart';
 
-import 'gdprinitialpage.dart';
+import 'gdprinitialscreen.dart';
 
-/// Singleton Helper class to initiate Gdpr and Ads only once.
+/// This class is a convenience singleton to make [GdprInitialScreen] and
+/// [GdprUpdateScreen] reusable with the same configuration.
 ///
-/// And then access [GdprInitialPage] and [GdprUpdatePage]
-/// via [getInitialPage] and [getUpdateage].
+/// The initial consent form will check if a consent is necessary first and
+/// immediately return without showing a consent form if not. This form is meant to
+/// get the initial consent of a user.
+///
+/// The update consent form will ALWAYS show its consent form. This form is meant to
+/// change a user's consent.
 ///
 /// Usage:
 ///
 /// ```dart
-/// GdprPageManager( ... params ...);
+/// GdprScreenManager( ... params ...);
 ///
-/// GdprPageManager( ... params ...).initialPage();
-///
-/// Scaffold(body:
-///   GdprPageManager.singleton.initialPage());
+/// GdprScreenManager( ... params ...).initialGdprScreen();
 ///
 /// Scaffold(body:
-///   GdprPageManager.singleton.initialResetPage());
+///   GdprScreenManager.getInitialGdprScreen());
 ///
 /// Scaffold(body:
-///   GdprPageManager.singleton.updatePage());
+///   GdprScreenManager.getInitialResetGdprScreen());
+///
+/// Scaffold(body:
+///   GdprScreenManager.getUpdateGdprScreen());
 /// ```
-///
-class GdprPageManager {
-  late VoidCallback _onNavigationMethod;
-  //
+class GdprScreenManager {
+  late Function(BuildContext) _onNavigationMethod;
   late List<String> _bannerIds;
   late List<String> _interstitialIds;
   late List<String> _interRewardIds;
   late List<String> _debugTestDeviceIds;
-  //
   late Widget _loadingWidget;
   late GdprDebugGeography _debugGeography;
   late bool _showDebugUI;
 
-  GdprPageManager._internal();
-  static final GdprPageManager singleton = GdprPageManager._internal();
+  GdprScreenManager._internal();
+  static final GdprScreenManager _singleton = GdprScreenManager._internal();
 
   /// Initializes this singleton
-  factory GdprPageManager(
-    final VoidCallback onNavigationMethod, {
+  factory GdprScreenManager(
+    final Function(BuildContext) onNavigationMethod, {
     final List<String> bannerIds = const [],
     final List<String> interstitialIds = const [],
     final List<String> interRewardIds = const [],
@@ -52,10 +54,9 @@ class GdprPageManager {
     final Widget loadingWidget =
         const Center(child: CircularProgressIndicator()),
     final GdprDebugGeography debugGeography = GdprDebugGeography.disabled,
-    // final List<String> debugTestIdentifiers = const [],
     final bool debugShowDebugUI = false,
   }) =>
-      singleton
+      _singleton
         .._onNavigationMethod = onNavigationMethod
         .._bannerIds = bannerIds
         .._interstitialIds = interstitialIds
@@ -65,28 +66,24 @@ class GdprPageManager {
         .._debugGeography = debugGeography
         .._showDebugUI = debugShowDebugUI;
 
-  // /// Returns a [GdprInitialPage].
-  // static GdprInitialPage initialPage() => _singleton._gdprPage(false);
+  /// Returns a [GdprInitialScreen].
+  static GdprInitialScreen initialGdprScreen() => _singleton._gdprScreen(false);
 
-  // /// Returns a [GdprInitialPage] after reseting the GDPR consent values.
-  // static GdprInitialPage initialPageReset() => _singleton._gdprPage(true);
+  /// Returns a [GdprInitialScreen] after reseting the GDPR consent values.
+  static GdprInitialScreen initialResetGdprScreen() =>
+      _singleton._gdprScreen(true);
 
-  // /// Returns a [GdprUpdatePage].
-  // static GdprUpdatePage updatePage() => _singleton._gdprUpdatePage();
+  /// Returns a [GdprUpdateScreen].
+  static GdprUpdateScreen updateGdprScreen() => _singleton._gdprUpdateScreen();
 
-  /// Returns a [GdprInitialPage].
-  GdprInitialPage initialPage() => singleton._gdprPage(false);
-
-  /// Returns a [GdprInitialPage] after reseting the GDPR consent values.
-  GdprInitialPage initialPageReset() => singleton._gdprPage(true);
-
-  /// Returns a [GdprUpdatePage].
-  GdprUpdatePage updatePage() => singleton._gdprUpdatePage();
+  /// Returns a [GdprInitialScreen].
+  /// Useful for calling after instantiating this singleton class.
+  GdprInitialScreen getInitialGdprScreen() => initialGdprScreen();
 
   /// Displays an GDPR initial dialog
   /// It will only display the dialog if not prior GDPR has been collected.
-  GdprInitialPage _gdprPage(bool debugResetConsentForm) {
-    return GdprInitialPage(
+  GdprInitialScreen _gdprScreen(bool debugResetConsentForm) {
+    return GdprInitialScreen(
       () async => _initAdmob(),
       _onNavigationMethod,
       debugTestIdentifiers: _debugTestDeviceIds,
@@ -99,8 +96,8 @@ class GdprPageManager {
 
   /// Displays an GDPR update consent form.
   /// It will always display the dialog.
-  GdprUpdatePage _gdprUpdatePage() {
-    return GdprUpdatePage(
+  GdprUpdateScreen _gdprUpdateScreen() {
+    return GdprUpdateScreen(
       () async => _initAdmob(),
       _onNavigationMethod,
       debugTestIdentifiers: _debugTestDeviceIds,

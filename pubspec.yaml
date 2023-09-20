@@ -1,6 +1,6 @@
 name: gdpr_ads
 description: GDPR service, GDPR intermediate screen, Admob manager for loading and displaying 
-version: 0.1.0+2
+version: 1.0.0
 homepage: https://github.com/xErik/gdpr_ads/
 issues: https://github.com/xErik/gdpr_ads/issues
 
@@ -18,11 +18,9 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+  args: ^2.4.2
+  mdmerge: ^1.1.0+1
 
-# For information on the generic Dart part of this file, see the
-# following page: https://dart.dev/tools/pub/pubspec
-
-# The following section is specific to Flutter packages.
 flutter:
 
   # To add assets to your package, add an assets section, like this:

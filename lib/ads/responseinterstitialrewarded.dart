@@ -1,6 +1,6 @@
 /// The interstitial-rewared-ad can return all values.
 enum StatusInterstitialRewarded {
-  /// The app tried to laods ads on Flutter Web, which is not supported
+  /// The app tried to load ads on Flutter Web, which is not supported
   notLoadedOnWeb,
 
   /// Failed to load the ad
@@ -9,14 +9,23 @@ enum StatusInterstitialRewarded {
   /// No ad ID(s) given
   notLoadedAdIdNotSet,
 
+  /// If the ad is being loaded
+  notLoadedButTryingTo,
+
   // Ad had been shown right now
   displaySuccess,
 
   // User denied seeing the ad in the confirmation dialog
   displayDeniedByUser,
 
+  // User aborts seeing the ad
+  displayAbortedByUser,
+
   /// Ads disabled programmatically
   displayDeniedProgrammatically,
+
+  /// Ad failed to show for unspecific reason
+  displayFailedUnspecificReasons,
 }
 
 /// Response when failing or succeeding in showing an ad.
