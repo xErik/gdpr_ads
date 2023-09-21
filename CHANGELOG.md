@@ -15,3 +15,7 @@
 
 * Added GdprManagerService
 * Added loading status to Rewarded / Interstitial Ads
+
+## 1.1.0
+
+* Added customizable Rewarded Interstitial Dialog

@@ -126,7 +126,7 @@ class GdprScreenWrapper extends StatelessWidget {
       showDebugUI: kDebugMode,
       debugResetConsentForm: resetConfirmationForm,
       loadingWidget: const Center(child: CircularProgressIndicator()),
-      debugGeography: GdprDebugGeography.disabled,
+      debugGeography: GdprDebugGeography.insideEea,
     );
   }
 

@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../responseinterstitialrewarded.dart';
-import 'dialogconfirmad.dart';
 
 class RewardedInterstitialInstance {
   Completer<ResponseInterstitialRewarded> _completer =
@@ -27,7 +26,7 @@ class RewardedInterstitialInstance {
   ///
   /// Call [fetchAd] before calling this method.
   Future<ResponseInterstitialRewarded> showConfirmAdDialog(
-      BuildContext context) async {
+      Widget dialog, BuildContext context) async {
     _log('Preparing confirm dialog ...');
 
     /// The completer may indicate failed loading in [fetchAd].
@@ -41,23 +40,41 @@ class RewardedInterstitialInstance {
 
         await showDialog<StatusInterstitialRewarded>(
           context: context,
-          builder: (_) => DialogConfirmAd(showNoAd: () {
-            _log('showNoAd(), completing with: displayDeniedByUser');
-            _completer.complete(ResponseInterstitialRewarded(
-                StatusInterstitialRewarded.displayDeniedByUser));
-          }, showAd: () {
-            _log('showAd()');
-            _adToShow?.show(
-              onUserEarnedReward: (AdWithoutView view, RewardItem rewardItem) {
-                _log('  - onUserEarnedReward');
-                _rewardItem = rewardItem;
-              },
-            );
-          }),
+          builder: (_) => dialog,
+
+          // DialogConfirmAd(showNoAd: () {
+          //   _log('showNoAd(), completing with: displayDeniedByUser');
+          //   _completer.complete(ResponseInterstitialRewarded(
+          //       StatusInterstitialRewarded.displayDeniedByUser));
+          // }, showAd: () {
+          // _log('showAd()');
+          // _adToShow?.show(
+          //   onUserEarnedReward: (AdWithoutView view, RewardItem rewardItem) {
+          //     _log('  - onUserEarnedReward');
+          //     _rewardItem = rewardItem;
+          //   },
+          // );
+          // }),
         );
       }
     }
     return _completer.future;
+  }
+
+  void showNoAdHook() {
+    _log('showNoAd(), completing with: displayDeniedByUser');
+    _completer.complete(ResponseInterstitialRewarded(
+        StatusInterstitialRewarded.displayDeniedByUser));
+  }
+
+  void showAdHook() {
+    _log('showAd()');
+    _adToShow?.show(
+      onUserEarnedReward: (AdWithoutView view, RewardItem rewardItem) {
+        _log('  - onUserEarnedReward');
+        _rewardItem = rewardItem;
+      },
+    );
   }
 
   /// Fetches an ad in the background.

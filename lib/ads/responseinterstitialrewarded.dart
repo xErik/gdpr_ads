@@ -6,6 +6,9 @@ enum StatusInterstitialRewarded {
   /// Failed to load the ad
   notLoadedGenerally,
 
+  /// AdService not initialized
+  notLoadedInitialized,
+
   /// No ad ID(s) given
   notLoadedAdIdNotSet,
 

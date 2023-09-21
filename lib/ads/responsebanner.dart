@@ -29,6 +29,9 @@ enum StatusBanner {
   /// Failed to load the ad
   notLoadedGenerally,
 
+  /// AdService not initialized
+  notLoadedInitialized,
+
   /// Failed to load the ad in case of GDPR denial etc.
   notLoadedAdIdNotSet,
 

@@ -18,6 +18,7 @@ import 'src/rewardedinterstitialservice.dart';
 /// It allows to enable and disable Ad initialization as well as Ad serving.
 class AdService {
   bool _serveAds = true;
+  bool _isInitialized = false;
 
   final Map<String, BannerServiceInstance> _bannerMap = {};
   final Map<String, InterstitialServiceInstance> _intertsitialMap = {};
@@ -38,7 +39,7 @@ class AdService {
   void enableAds() => _serveAds = true;
 
   // Wether service is disabled. Always disabled in web.
-  bool isDisabled() => _serveAds == false || kIsWeb == true;
+  bool isDisabledProgrammatically() => _serveAds == false || kIsWeb == true;
 
   // --------------------------------------------------------------------------
   //
@@ -58,7 +59,8 @@ class AdService {
     _intertsitialMap.clear();
     _interstitialRewardedMap.clear();
 
-    if (isDisabled()) {
+    if (isDisabledProgrammatically()) {
+      _isInitialized = false;
       return;
     }
 
@@ -91,6 +93,8 @@ class AdService {
       _interstitialRewardedMap.putIfAbsent(adUnitId, () => instance);
       _log('Added interRewardedId: $adUnitId');
     }
+
+    _isInitialized = true;
   }
 
   // --------------------------------------------------------------------------
@@ -101,8 +105,12 @@ class AdService {
   ///
   /// Returns a [ResponseBanner] which contains a status and potentially a [BannerAd].
   Future<ResponseBanner> getBanner({String? adUnitId}) async {
-    if (isDisabled()) {
+    if (isDisabledProgrammatically()) {
       return ResponseBanner(StatusBanner.displayDeniedProgrammatically);
+    }
+
+    if (_isInitialized == false) {
+      return ResponseBanner(StatusBanner.notLoadedInitialized);
     }
 
     if (_bannerMap[adUnitId] == null && _bannerMap.isEmpty) {
@@ -118,11 +126,16 @@ class AdService {
 
   /// Returns a [ResponseInterstitialRewarded] which informs about the rewarded dialog.
   Future<ResponseInterstitialRewarded> showInterstitialRewarded(
-      BuildContext context,
+      BuildContext context, Widget confirmDialog,
       {String? adUnitId}) async {
-    if (isDisabled()) {
+    if (isDisabledProgrammatically()) {
       return ResponseInterstitialRewarded(
           StatusInterstitialRewarded.displayDeniedProgrammatically);
+    }
+
+    if (_isInitialized == false) {
+      return ResponseInterstitialRewarded(
+          StatusInterstitialRewarded.notLoadedInitialized);
     }
 
     if (_interstitialRewardedMap[adUnitId] == null &&
@@ -138,17 +151,21 @@ class AdService {
           StatusInterstitialRewarded.notLoadedButTryingTo);
     }
 
-    final result =
-        await _interstitialRewardedMap[adUnitId]!.showConfirmAdDialog(context);
+    final result = await _interstitialRewardedMap[adUnitId]!
+        .showConfirmAdDialog(confirmDialog, context);
     _interstitialRewardedMap[adUnitId]!.fetchAd(); // no await
     return result;
   }
 
   /// Returns a [ResponseInterstitial] which informs about the rewarded dialog.
   Future<ResponseInterstitial> showInterstitial({String? adUnitId}) async {
-    if (isDisabled()) {
+    if (isDisabledProgrammatically()) {
       return ResponseInterstitial(
           StatusInterstitial.displayDeniedProgrammatically);
+    }
+
+    if (_isInitialized == false) {
+      return ResponseInterstitial(StatusInterstitial.notLoadedInitialized);
     }
 
     if (_intertsitialMap[adUnitId] == null && _intertsitialMap.isEmpty) {
@@ -164,6 +181,34 @@ class AdService {
     final result = await _intertsitialMap[adUnitId]!.showAd();
     _intertsitialMap[adUnitId]!.fetchAd(); // no await
     return result;
+  }
+
+  /// Hook to process the outcome of a a Rewarded Interstital Ad.
+  ///
+  /// See [RewardedInterstitialDialog] on how to use this hook.
+  void interstitialRewardedShowAdHook({String? adUnitId}) {
+    if (_interstitialRewardedMap[adUnitId] == null &&
+        _interstitialRewardedMap.isEmpty) {
+      throw 'adUnitId is not given and there is no alternative RewardedInterstitial is available.';
+    }
+
+    adUnitId ??= _interstitialRewardedMap.keys.first;
+
+    _interstitialRewardedMap[adUnitId]!.showAdHook();
+  }
+
+  /// Hook to process the outcome of a a Rewarded Interstital Ad.
+  ///
+  /// See [RewardedInterstitialDialog] on how to use this hook.
+  void interstitialRewardedShowNoAdHook({String? adUnitId}) {
+    if (_interstitialRewardedMap[adUnitId] == null &&
+        _interstitialRewardedMap.isEmpty) {
+      throw 'adUnitId is not given and there is no alternative RewardedInterstitial is available.';
+    }
+
+    adUnitId ??= _interstitialRewardedMap.keys.first;
+
+    _interstitialRewardedMap[adUnitId]!.showNoAdHook();
   }
 
   _log(String text) => log(text, name: runtimeType.toString());

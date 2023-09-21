@@ -6,6 +6,9 @@ enum StatusInterstitial {
   /// Failed to load the ad
   notLoadedGenerally,
 
+  /// AdService not initialized
+  notLoadedInitialized,
+
   /// Service instance has no ad to load
   notLoadedAdIdNotSet,
 

@@ -6,6 +6,8 @@ import 'package:gdpr_ads/ads/responseinterstitial.dart';
 import 'package:gdpr_ads/ads/responseinterstitialrewarded.dart';
 import 'package:gdpr_ads/gdpr/gdprscreenmanager.dart';
 
+import 'rewaredinterstitialdialog.dart';
+
 class AfterGdprScreen extends StatefulWidget {
   const AfterGdprScreen({Key? key}) : super(key: key);
 
@@ -173,7 +175,9 @@ ${interRewardedResponse!.prettyError()}''';
 
   Future<void> _showInterRewardedAd(BuildContext context) async {
     setState(() => interRewardedResponse = null);
-    final result = await AdService().showInterstitialRewarded(context);
+    final result = await AdService().showInterstitialRewarded(
+        context, const RewardedInterstitialDialog(adUnitId: null),
+        adUnitId: null);
     setState(() => interRewardedResponse = result);
   }
 
@@ -182,4 +186,8 @@ ${interRewardedResponse!.prettyError()}''';
     final result = await AdService().showInterstitial();
     setState(() => interResponse = result);
   }
+
+  // Widget _getConfirmDialog() {
+  //   return RewaredInterstitialDialog(dialog: dialog, countdownSeconds: countdownSeconds, showAd: showAd, showNoAd: showNoAd)
+  // }
 }
