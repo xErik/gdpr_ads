@@ -19,3 +19,7 @@
 ## 1.1.0
 
 * Added customizable Rewarded Interstitial Dialog
+
+## 1.1.0+1
+
+* README 

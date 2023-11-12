@@ -12,9 +12,11 @@ This package consists of two components: GDPR and Ads. Noth may be used [individ
 
 Steps:
 
-1. Configure `MaterialApp( home: GdprScreenManager() )`.
-2. Display Ads.
-3. Update or reset GDPR on request. 
+1. Admob account: create an Ad-ID and setup a GDPR message 
+2. Update `AndroidManifest.xml` and `build.gradle`
+3. Configure `MaterialApp( home: GdprScreenManager() )`
+4. Display Ads
+5. Update or reset GDPR on request
 
 ## Initialize GDPR and Ads
 
@@ -37,7 +39,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
+      
       home: GdprScreenManager(
         
         (BuildContext context) => 
@@ -48,11 +50,11 @@ class MainApp extends StatelessWidget {
         bannerIds: ["ca-app-pub-3940256099942544/6300978111"],
         interstitialIds: ["ca-app-pub-3940256099942544/1033173712"],
         interRewardIds: ["ca-app-pub-3940256099942544/5354046379"],
-        
         debugTestDeviceIds: [" ... YOUR TEST DEVICE ID HERE ... "],
 
         // Force or unforce GDPR dialog for testing
         debugGeography: GdprDebugGeography.insideEea,
+
       ).getInitialGdprScreen(),
     );
   }
@@ -110,19 +112,32 @@ Navigator.of(context).pushReplacement(
 
 If no `adUnitId` is given the first available Ad unit will be displayed. 
 
+### Show a banner Ad
+
+
 In `kDebugMode` the `AdBanner`` will display additonal info.
 
 ```dart
-Scaffold(body: AdBanner(String? adUnitId) );
+Scaffold(body: AdBanner(' ... Ad ID ...') );
+
+// OR 
+
+Scaffold(body: AdBanner( );
 ```
 
-The returned responses have a status-enum detailing
-the results.
+### Show an Interstitial Ad
 
 ```dart
 final ResponseInterstitial result 
-  = await AdService().showInterstitial(String? adUnitId);
+  = await AdService().showInterstitial(' ... Ad ID ...');
+
+// OR
+
+final ResponseInterstitial result 
+  = await AdService().showInterstitial();
 ```
+
+### Show an rewarded interstitial Ad
 
 A Rewarded Interstitial requires a dialog with a timer. 
 
@@ -133,22 +148,52 @@ For convenience, copy the class `RewardedInterstitialDialog` into your project a
 Then, call `AdService().showInterstitialRewarded()` with your dialog as a parameter as given below.
 
 ```dart
-// Both `adUnitId`s referenced below need to be the same.
+// Both `adUnitId`s referenced below need to be the same, or NULL.
 
 final String? adUnitId = null;
-
-// Or
-
-final String? adUnitId = '... Ad unit ID ... ';
 
 final ResponseInterstitialRewarded result 
   = await AdService().showInterstitialRewarded(
       context, 
       const RewardedInterstitialDialog(
-        adUnitId:adUnitId, countdownSeconds:5,
+        adUnitId: adUnitId, 
+        countdownSeconds:5,
       ),
-      adUnitId:adUnitId,
+      adUnitId: adUnitId,
     );
+```
+
+### Response details
+
+The returned responses have a status-enum detailing the results.
+
+```dart
+final ResponseInterstitialRewarded result =
+    await AdService().showInterstitialRewarded(
+  context,
+  const RewardedInterstitialDialog(
+    countdownSeconds: 5,
+  ),
+);
+
+
+
+if (
+    result.status == StatusInterstitialRewarded.displaySuccess ||
+  
+    result.status ==
+        StatusInterstitialRewarded.displayDeniedProgrammatically ||
+  
+    result.status ==
+        StatusInterstitialRewarded.displayFailedUnspecificReasons ||
+  
+    result.status == StatusInterstitialRewarded.notLoadedInitialized
+  
+  ) {
+  // Ad has been shown or is not available for some technical reason
+} else {
+  // User has canceld the Ad
+}
 ```
 
 ## Example

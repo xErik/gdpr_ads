@@ -15,19 +15,20 @@ enum StatusInterstitialRewarded {
   /// If the ad is being loaded
   notLoadedButTryingTo,
 
-  // Ad had been shown right now
+  /// Ad had been shown right now
   displaySuccess,
 
-  // User denied seeing the ad in the confirmation dialog
+  /// User denied seeing the ad in the confirmation dialog
   displayDeniedByUser,
 
-  // User aborts seeing the ad
+  /// User aborts seeing the ad
   displayAbortedByUser,
 
-  /// Ads disabled programmatically
+  /// Ads disabled programmatically. Either when on Flutter Web or
+  /// `disableAds()` has been called from within the code.
   displayDeniedProgrammatically,
 
-  /// Ad failed to show for unspecific reason
+  /// Ad failed to show for unspecific reason by Admob.
   displayFailedUnspecificReasons,
 }
 
