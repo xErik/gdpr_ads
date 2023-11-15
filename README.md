@@ -180,14 +180,15 @@ final ResponseInterstitialRewarded result =
 
 if (
     result.status == StatusInterstitialRewarded.displaySuccess ||
-  
     result.status ==
         StatusInterstitialRewarded.displayDeniedProgrammatically ||
-  
     result.status ==
         StatusInterstitialRewarded.displayFailedUnspecificReasons ||
-  
-    result.status == StatusInterstitialRewarded.notLoadedInitialized
+    result.status == StatusInterstitialRewarded.notLoadedInitialized ||
+    result.status == StatusInterstitialRewarded.notLoadedAdIdNotSet ||
+    result.status == StatusInterstitialRewarded.notLoadedButTryingTo ||
+    result.status == StatusInterstitialRewarded.notLoadedGenerally ||
+    result.status == StatusInterstitialRewarded.notLoadedAdIdNotSet
   
   ) {
   // Ad has been shown or is not available for some technical reason
