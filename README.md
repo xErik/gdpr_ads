@@ -1,4 +1,4 @@
-GDPR service, GDPR intermediate screen, Admob manager for loading and displaying 
+GDPR service, GDPR intermediate screen, Admob manager for loading and displaying Ads
 
 ## Features
 
@@ -206,15 +206,17 @@ The example folder contains a working example. Set your test device ID before ru
 
 ## TODO
 
-- Add other ads
+- Add other ad types
+- Rename the enums detailing the ad results
+- Add method call that returns whether user has accepted or declined ads.
 
 ## Additional information
 
 Google Admob can be painful, GDPR may time out, Ad slots may not get filled sometimes, also not sure if VPNs play well with Admob.  
 
-[Issue Tracker](https://github.com/xErik/gdpr_ads/issues).
+[Issue Tracker](https://github.com/xErik/gdpr_ads/issues)
 
-Admob project configuration
+Admob project configuration, configure your app project for ads:
 
 [AndroidManifest.xml and build.gradle](README_admob.md)
 
