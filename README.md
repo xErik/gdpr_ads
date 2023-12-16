@@ -55,6 +55,9 @@ class MainApp extends StatelessWidget {
         // Force or unforce GDPR dialog for testing
         debugGeography: GdprDebugGeography.insideEea,
 
+        // Custom loading widget 
+        loadingWidget: ...
+
       ).getInitialGdprScreen(),
     );
   }
